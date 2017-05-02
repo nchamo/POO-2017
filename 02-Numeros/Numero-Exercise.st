@@ -319,20 +319,20 @@ addFraccion: aFraccion
 	
 	^ aFraccion addEntero: self! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:03:42'!
-divideByEntero: anEntero 
+!Entero methodsFor: 'arithmetic operations' stamp: 'PV 5/2/2017 17:19:38'!
+divideCallBack: aNumber 
+
+	^ aNumber divideEntero: self! !
+
+!Entero methodsFor: 'arithmetic operations' stamp: 'PV 5/2/2017 17:19:13'!
+divideEntero: anEntero 
 	
 	^ Fraccion with: self over: anEntero! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:58:06'!
-divideByFraccion: aFraccion 
+!Entero methodsFor: 'arithmetic operations' stamp: 'PV 5/2/2017 17:19:45'!
+divideFraccion: aFraccion 
 
-	^ self * aFraccion denominator divideByEntero: aFraccion numerator! !
-
-!Entero methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:16:24'!
-divideCallBack: aNumber 
-
-	^ aNumber divideByEntero: self! !
+	^ self * aFraccion denominator divideEntero: aFraccion numerator! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:03:23'!
 greatestCommonDivisorWith: anEntero 
@@ -439,20 +439,20 @@ addFraccion: aFraccion
 	
 	^newNumerator / newDenominator! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 20:11:19'!
-divideByEntero: anEntero 
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 5/2/2017 17:19:57'!
+divideCallBack: aNumber 
+
+	^ aNumber divideFraccion: self ! !
+
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 5/2/2017 17:24:29'!
+divideEntero: anEntero 
 
 	^ self class with: numerator over: denominator * anEntero! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 20:45:17'!
-divideByFraccion: aFraccion 
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 5/2/2017 17:21:07'!
+divideFraccion: aFraccion 
 	
 	^ (numerator * aFraccion denominator) / (denominator * aFraccion numerator)! !
-
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:15:54'!
-divideCallBack: aNumber 
-
-	^ aNumber divideByFraccion: self ! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 18:29:08'!
 multiplyEntero: anEntero 
