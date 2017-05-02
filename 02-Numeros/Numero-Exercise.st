@@ -294,10 +294,10 @@ initalizeWith: aValue
 	^ anAdder addEntero: self
 ! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:29:52'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:16:15'!
 / aDivisor 
 	
-	^ aDivisor enteroDivideCallBack: self.! !
+	^ aDivisor divideCallBack: self.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:55'!
 // aDivisor 
@@ -319,12 +319,9 @@ addFraccion: aFraccion
 	
 	^ aFraccion addEntero: self! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:51:28'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:03:42'!
 divideByEntero: anEntero 
 	
-	(self \\ anEntero)  isZero ifTrue:
-		[ ^ self class with: self integerValue  / anEntero integerValue ].
-
 	^ Fraccion with: self over: anEntero! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:58:06'!
@@ -332,15 +329,10 @@ divideByFraccion: aFraccion
 
 	^ self * aFraccion denominator divideByEntero: aFraccion numerator! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:32:04'!
-enteroDivideCallBack: anEntero 
+!Entero methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:16:24'!
+divideCallBack: aNumber 
 
-	^ anEntero divideByEntero: self! !
-
-!Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 20:12:33'!
-fraccionDivideCallBack: aFraccion 
-
-	^ aFraccion divideByEntero: self! !
+	^ aNumber divideByEntero: self! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:03:23'!
 greatestCommonDivisorWith: anEntero 
@@ -423,10 +415,10 @@ hash
 	
 	^ anAdder addFraccion: self! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:59:57'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:16:08'!
 / aDivisor
 	
-	^ aDivisor fraccionDivideCallBack: self! !
+	^ aDivisor divideCallBack: self! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 18:10:25'!
 addEntero: anEntero
@@ -452,20 +444,15 @@ divideByEntero: anEntero
 
 	^ self class with: numerator over: denominator * anEntero! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 20:22:28'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 20:45:17'!
 divideByFraccion: aFraccion 
 	
 	^ (numerator * aFraccion denominator) / (denominator * aFraccion numerator)! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 19:53:08'!
-enteroDivideCallBack: anEntero 
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'NC 5/1/2017 21:15:54'!
+divideCallBack: aNumber 
 
-	^ anEntero divideByFraccion: self ! !
-
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 20:01:59'!
-fraccionDivideCallBack: aFraccion 
-
-	aFraccion divideByFraccion: self! !
+	^ aNumber divideByFraccion: self ! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'PV 4/30/2017 18:29:08'!
 multiplyEntero: anEntero 
