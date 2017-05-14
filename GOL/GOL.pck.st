@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3076] on 14 May 2017 at 8:21:29 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3076] on 14 May 2017 at 1:07:13 pm'!
 'Description Please enter a description for this package'!
-!provides: 'GOL' 1 1!
+!provides: 'GOL' 1 2!
 !classDefinition: #GOLTest category: #GOL!
 TestCase subclass: #GOLTest
 	instanceVariableNames: ''
@@ -32,14 +32,14 @@ GameOfLife class
 	instanceVariableNames: ''!
 
 
-!Rectangle methodsFor: '*GOL' stamp: 'PV 5/14/2017 06:41:26'!
+!Rectangle methodsFor: '*GOL' stamp: 'PV 5/14/2017 12:57:32'!
 points
 	| enumeratedPoints |
 	
 	enumeratedPoints := Set new.
 	
-	0 to: corner x - 1 do: [ :x | 
-		0 to: corner y - 1 do: [ :y |
+	origin x to: corner x - 1 do: [ :x | 
+		origin y to: corner y - 1 do: [ :y |
 			enumeratedPoints add: x@y]].
 
 	^enumeratedPoints! !
@@ -158,6 +158,33 @@ test03PointsContainsAllRectanglePointsForTwoByTwoRect
 	rectangle := Rectangle origin: 0@0 corner: 2@2.
 	
 	^self assert: rectangle points = {0@0. 0@1. 1@0. 1@1.} asSet! !
+
+!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 12:45:41'!
+test04PointsWorksWithRectangleWithOriginOtherThanZeroZero
+
+	| rectangle |
+
+	rectangle := Rectangle origin: 1@1 corner: 2@2.
+	
+	^self assert: rectangle points = {1@1.} asSet! !
+
+!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 12:51:51'!
+test05VerifyHowRectangleWithOriginNotZeroZeroBehaves
+
+	| rectangle |
+
+	rectangle := Rectangle origin: 1@1 corner: 2@2.
+	
+	^self assert: (rectangle containsPoint: 2@2) not! !
+
+!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 13:06:19'!
+test06SubstractPointsWorksForARectangleWithOriginOtherThanZeroZero
+
+	| rectangle |
+
+	rectangle := Rectangle origin: 1@1 corner: 3@4.
+	
+	^self assert: (rectangle substractPoints: {1@1. 2@2. 1@3}) = {2@1. 1@2. 2@3} asSet! !
 
 !GameOfLife methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 07:18:15'!
 deadCells
