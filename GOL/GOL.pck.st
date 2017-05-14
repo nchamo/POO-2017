@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3076] on 14 May 2017 at 1:07:13 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3076] on 14 May 2017 at 2:38:31 pm'!
 'Description Please enter a description for this package'!
-!provides: 'GOL' 1 2!
+!provides: 'GOL' 1 5!
 !classDefinition: #GOLTest category: #GOL!
 TestCase subclass: #GOLTest
 	instanceVariableNames: ''
@@ -32,7 +32,7 @@ GameOfLife class
 	instanceVariableNames: ''!
 
 
-!Rectangle methodsFor: '*GOL' stamp: 'PV 5/14/2017 12:57:32'!
+!Rectangle methodsFor: '*GOL' stamp: 'NC 5/14/2017 13:15:38'!
 points
 	| enumeratedPoints |
 	
@@ -42,19 +42,24 @@ points
 		origin y to: corner y - 1 do: [ :y |
 			enumeratedPoints add: x@y]].
 
-	^enumeratedPoints! !
+	^ enumeratedPoints! !
 
-!Rectangle methodsFor: '*GOL' stamp: 'PV 5/14/2017 06:40:55'!
-substractPoints: aCollectionOfPoints
+!GOLTest methodsFor: 'private' stamp: 'NC 5/14/2017 12:42:08'!
+boardCreationFailsWithCells: aCollectionOfLiveCells andSize: aSize
 	
-	^self points select: [ :aPoint | (aCollectionOfPoints includes: aPoint) not ]! !
+	self
+		should: [ self newWithLiveCells: aCollectionOfLiveCells andSize: aSize. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: GameOfLife cellOutOfBoundsExceptionDescription ]
+! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 02:10:30'!
+!GOLTest methodsFor: 'private' stamp: 'PV 5/14/2017 02:10:30'!
 newWithLiveCells: aCollectionOfLiveCells andSize: aSize
 	
 	^ GameOfLife withLiveCells: aCollectionOfLiveCells withSize: aSize.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 02:14:21'!
+!GOLTest methodsFor: 'testing' stamp: 'PV 5/14/2017 02:14:21'!
 test01AliveCellWithLessThanTwoAliveNeighDies
 
 	| game |
@@ -65,84 +70,80 @@ test01AliveCellWithLessThanTwoAliveNeighDies
 	
 	self assert: (game isDeadAt: 1@1) ! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:43:55'!
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 14:35:18'!
 test02AliveCellWithTwoAliveNeighStaysAlive
 
 	| game |
 	
 	game := self newWithLiveCells: { 1@1. 2@0. 1@0. } andSize: 3@3.
+
 	game nextGeneration.
-	
+
 	self assert: (game isAliveAt: 1@1) ! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:44:57'!
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 14:35:32'!
 test03AliveCellWithThreeAliveNeighStaysAlive
 
 	| game |
 
 	game := self newWithLiveCells: { 1@1. 2@0. 1@0. 1@2. } andSize: 3@3.
+
 	game nextGeneration.
-	
+
 	self assert: (game isAliveAt: 1@1) ! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 02:18:28'!
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 14:35:36'!
 test04AliveCellWithMoreThanThreeAliveNeighDies
 
 	| game |
 
 	game := self newWithLiveCells: { 1@1. 2@0. 1@0. 1@2. 0@1 } andSize: 3@3.
+
 	game nextGeneration.
 
 	self assert: (game isDeadAt: 1@1) ! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:45:11'!
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 14:35:50'!
 test05DeadCellWithThreeAliveNeighResurrects
 
 	| game |
 
 	game := self newWithLiveCells: { 2@0. 1@0. 0@0 } andSize: 3@3.
+
 	game nextGeneration.
 
 	self assert: (game isAliveAt: 1@1)! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:02:11'!
-test06CreateCellOutsideBoundsFails
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 13:23:02'!
+test06BoardCreationWIthCellOutOfBoundsFails
 
-	self
-		should: [ self newWithLiveCells: { 2@0. 1@0. 1@4 } andSize: 3@3. ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: anError messageText equals: 'celda fuera de rango' ]! !
+	self boardCreationFailsWithCells: { 2@0. 1@0. 1@4 } andSize: 3@3.
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:31:20'!
-test07CreateCellInBorderDoesntFail
+	self boardCreationFailsWithCells: { 2@0. 1@0. 4@1 } andSize: 3@3.
+
+	self boardCreationFailsWithCells: { 2@0. 1@0. -1@2 } andSize: 3@3.
+
+	self boardCreationFailsWithCells: { 2@0. 1@0. 2@-1 } andSize: 3@3.
+! !
+
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 12:29:22'!
+test07BoardCreationWIthCellInBoundsDoesntFails
 
 	self
 		shouldnt: [ self newWithLiveCells: { 2@0. 1@0. 1@3 } andSize: 3@3. ]
 		raise: Error! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 07:13:15'!
-test08DeadCellsWorksWithTwoByTwoBoard
+!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 14:35:57'!
+test08RepeatedAliveCellsAreConsideredAsOne
 
 	| game |
-
-	game := self newWithLiveCells: { 0@0. 1@0. 0@1 } andSize: 1@1.
 	
-	self assert: game deadCells = { 1@1 } asSet ! !
-
-!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:49:24'!
-test01SubstractPointsFromATwoByTwoRectangleWorks
-
-	| rectangle resultingPoints |
-
-	rectangle := Rectangle origin: 0@0 corner: 2@2.
-
-	resultingPoints := rectangle substractPoints: { 0@1. 1@1 }.
+	game := self newWithLiveCells: { 2@0. 2@0. } andSize: 3@3. 
 	
-	^self assert: resultingPoints = { 0@0. 1@0 } asSet! !
+	self assert: game numberOfAliveCells = 1! !
 
-!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:20:50'!
-test02PointsContainsAllRectanglePointsForOneByOneRect
+!RectangleTest methodsFor: 'testing' stamp: 'NC 5/14/2017 13:06:03'!
+test01PointsContainsAllRectanglePointsForOneByOneRect
 
 	| rectangle |
 
@@ -150,89 +151,85 @@ test02PointsContainsAllRectanglePointsForOneByOneRect
 	
 	^self assert: rectangle points = {0@0.} asSet! !
 
-!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:22:08'!
-test03PointsContainsAllRectanglePointsForTwoByTwoRect
+!RectangleTest methodsFor: 'testing' stamp: 'NC 5/14/2017 13:06:38'!
+test02PointsContainsAllRectanglePointsForTwoByTwoRect
 
 	| rectangle |
 
 	rectangle := Rectangle origin: 0@0 corner: 2@2.
 	
-	^self assert: rectangle points = {0@0. 0@1. 1@0. 1@1.} asSet! !
+	^self assert: rectangle points = {0@0 . 0@1 . 1@0 . 1@1.} asSet! !
 
-!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 12:45:41'!
-test04PointsWorksWithRectangleWithOriginOtherThanZeroZero
-
+!RectangleTest methodsFor: 'testing' stamp: 'NC 5/14/2017 13:16:40'!
+test03PointsWorksWithRectangleWithOriginOtherThanZeroZero
+ 
 	| rectangle |
+ 
+ 	rectangle := Rectangle origin: 1@1 corner: 2@2.
+ 	
+ 	^ self assert: rectangle points = {1@1.} asSet
+ ! !
 
-	rectangle := Rectangle origin: 1@1 corner: 2@2.
-	
-	^self assert: rectangle points = {1@1.} asSet! !
-
-!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 12:51:51'!
-test05VerifyHowRectangleWithOriginNotZeroZeroBehaves
-
-	| rectangle |
-
-	rectangle := Rectangle origin: 1@1 corner: 2@2.
-	
-	^self assert: (rectangle containsPoint: 2@2) not! !
-
-!RectangleTest methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 13:06:19'!
-test06SubstractPointsWorksForARectangleWithOriginOtherThanZeroZero
-
-	| rectangle |
-
-	rectangle := Rectangle origin: 1@1 corner: 3@4.
-	
-	^self assert: (rectangle substractPoints: {1@1. 2@2. 1@3}) = {2@1. 1@2. 2@3} asSet! !
-
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 07:18:15'!
+!GameOfLife methodsFor: 'private' stamp: 'NC 5/14/2017 13:05:07'!
 deadCells
 
-	^ board substractPoints: aliveCells! !
+	^ board points difference: aliveCells! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'HAW 5/11/2017 21:11:17'!
+!GameOfLife methodsFor: 'private' stamp: 'NC 5/14/2017 12:22:27'!
 hasToResurrect: aCell
 
-	^(self numberOfAliveNeighboursOf: aCell) = 3! !
+	^ (self numberOfAliveNeighboursOf: aCell) = 3! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'HAW 5/11/2017 19:57:05'!
+!GameOfLife methodsFor: 'private' stamp: 'NC 5/14/2017 12:22:40'!
 hasToSurvive: aCell
 	
-	| numberOfAliveNeighbours|
+	| numberOfAliveNeighbours |
 	
 	numberOfAliveNeighbours := self numberOfAliveNeighboursOf: aCell.
 	
-	^numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3]! !
+	^ numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3]! !
 
-!GameOfLife methodsFor: 'private' stamp: 'PV 5/14/2017 07:16:04'!
+!GameOfLife methodsFor: 'initialization' stamp: 'PV 5/14/2017 07:16:04'!
 initializeWith: aCollectionOfAliveCells andBoard: aBoard
 
 	aliveCells := aCollectionOfAliveCells.
 	board := aBoard.! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:45:52'!
+!GameOfLife methodsFor: 'testing' stamp: 'NC 5/14/2017 12:23:07'!
 isAliveAt: aCell
 
-	^aliveCells includes: aCell! !
+	^ aliveCells includes: aCell! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:46:24'!
+!GameOfLife methodsFor: 'testing' stamp: 'NC 5/14/2017 12:23:14'!
 isDeadAt: aCell
 
-	^(self isAliveAt: aCell)not! !
+	^ (self isAliveAt: aCell) not! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'PV 5/14/2017 06:58:56'!
+!GameOfLife methodsFor: 'game operations' stamp: 'PV 5/14/2017 06:58:56'!
 nextGeneration
 	
 	aliveCells := (aliveCells select: [ :anAliveCell | self hasToSurvive: anAliveCell ]) union:
 		(self deadCells select: [ :aDeadCell | self hasToResurrect: aDeadCell ])! !
 
-!GameOfLife methodsFor: 'private' stamp: 'HAW 5/10/2017 10:29:35'!
+!GameOfLife methodsFor: 'testing' stamp: 'NC 5/14/2017 12:46:24'!
+numberOfAliveCells
+
+	^ aliveCells size! !
+
+!GameOfLife methodsFor: 'private' stamp: 'NC 5/14/2017 12:31:16'!
 numberOfAliveNeighboursOf: aCell
 
-	^(aCell eightNeighbors intersection: aliveCells) size! !
+	^ (aCell eightNeighbors intersection: aliveCells) size! !
 
-!GameOfLife class methodsFor: 'instance creation' stamp: 'PV 5/14/2017 07:22:36'!
+!GameOfLife class methodsFor: 'error messages' stamp: 'NC 5/14/2017 12:26:40'!
+cellOutOfBoundsExceptionDescription
+	
+	^  'Cell out of bounds'.
+
+	
+	! !
+
+!GameOfLife class methodsFor: 'instance creation' stamp: 'NC 5/14/2017 12:33:49'!
 withLiveCells: aCollectionOfAliveCells withSize: aSize
 	"Note that Rectangle corner is exclusive. That's the reason why it's necessary to add 1@1 to the size to get the corner."
 
@@ -240,6 +237,6 @@ withLiveCells: aCollectionOfAliveCells withSize: aSize
 	
 	board := Rectangle origin: 0@0 corner: aSize + (1@1).
 
-	(aCollectionOfAliveCells allSatisfy: [ :aCell | board containsPoint: aCell]) ifFalse: [ self error: 'celda fuera de rango' ].
+	(aCollectionOfAliveCells allSatisfy: [ :aCell | board containsPoint: aCell]) ifFalse: [ self error: self cellOutOfBoundsExceptionDescription ].
 
-	^self new initializeWith: aCollectionOfAliveCells andBoard: board! !
+	^self new initializeWith: aCollectionOfAliveCells asSet andBoard: board! !
