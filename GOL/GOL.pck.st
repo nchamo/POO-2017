@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3076] on 14 May 2017 at 2:38:31 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3081] on 15 May 2017 at 6:19:35 pm'!
 'Description Please enter a description for this package'!
-!provides: 'GOL' 1 5!
+!provides: 'GOL' 1 7!
 !classDefinition: #GOLTest category: #GOL!
 TestCase subclass: #GOLTest
 	instanceVariableNames: ''
@@ -114,27 +114,32 @@ test05DeadCellWithThreeAliveNeighResurrects
 
 	self assert: (game isAliveAt: 1@1)! !
 
-!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 13:23:02'!
+!GOLTest methodsFor: 'testing' stamp: 'PV 5/15/2017 18:15:11'!
 test06BoardCreationWIthCellOutOfBoundsFails
 
-	self boardCreationFailsWithCells: { 2@0. 1@0. 1@4 } andSize: 3@3.
-
-	self boardCreationFailsWithCells: { 2@0. 1@0. 4@1 } andSize: 3@3.
-
-	self boardCreationFailsWithCells: { 2@0. 1@0. -1@2 } andSize: 3@3.
-
-	self boardCreationFailsWithCells: { 2@0. 1@0. 2@-1 } andSize: 3@3.
+	self boardCreationFailsWithCells: { 2@0. 1@0. 1@6 } andSize: 3@3.
 ! !
 
-!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 12:29:22'!
-test07BoardCreationWIthCellInBoundsDoesntFails
+!GOLTest methodsFor: 'testing' stamp: 'PV 5/15/2017 18:12:54'!
+test07BoardCreationWIthCellOutOfBoundsJustOverBorderFails
+
+	self boardCreationFailsWithCells: { 2@0. 1@0. 1@4 } andSize: 3@3.! !
+
+!GOLTest methodsFor: 'testing' stamp: 'PV 5/15/2017 18:14:25'!
+test08BoardCreationWIthCellOutOfBoundsAndNegativePositionFails
+
+	self boardCreationFailsWithCells: { 2@0. 1@0. -1@2 } andSize: 3@3.
+! !
+
+!GOLTest methodsFor: 'testing' stamp: 'PV 5/15/2017 18:15:38'!
+test09BoardCreationWIthCellInBoundsDoesntFail
 
 	self
 		shouldnt: [ self newWithLiveCells: { 2@0. 1@0. 1@3 } andSize: 3@3. ]
 		raise: Error! !
 
-!GOLTest methodsFor: 'testing' stamp: 'NC 5/14/2017 14:35:57'!
-test08RepeatedAliveCellsAreConsideredAsOne
+!GOLTest methodsFor: 'testing' stamp: 'PV 5/15/2017 18:11:36'!
+test10RepeatedAliveCellsAreConsideredAsOne
 
 	| game |
 	
