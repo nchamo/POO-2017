@@ -1,6 +1,6 @@
 !classDefinition: #DistanceTest category: #'Distance-Solution'!
 TestCase subclass: #DistanceTest
-	instanceVariableNames: 'oneMeter oneHundredCentimeters oneThousandMilimeters twoMeters zeroMeters zeroCentimeters ninetyCentimeters oneHundredMilimeters zeroMilimeters anotherMeter twoHundredMilimeters oneHalfMeter tenKilometers threeMeters'
+	instanceVariableNames: 'oneMeter oneHundredCentimeters oneThousandMilimeters twoMeters zeroMeters zeroCentimeters ninetyCentimeters oneHundredMilimeters zeroMilimeters anotherMeter twoHundredMilimeters oneHalfMeter tenKilometers threeMeters fiveCentimeters'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
@@ -57,11 +57,13 @@ test09
 
 	self assert: oneHundredMilimeters + oneHundredMilimeters  equals: twoHundredMilimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 11:36:02'!
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 18:44:32'!
 test10
-	"unMetro * 2 = dosMetros"
+	"unMetro * 2 = dosMetros
+	2 * unMetro = dosMetros"
 
-	self assert: oneMeter * 2 equals: twoMeters! !
+	self assert: oneMeter * 2 equals: twoMeters.
+	self assert: 2 * oneMeter equals: twoMeters! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 11:35:54'!
 test11
@@ -83,15 +85,53 @@ test12
 	"unMetro <= tresMetros"
 	self assert: oneMeter <= threeMeters.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 12:39:25'!
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 17:09:47'!
 test13
 	"unMetro to: tresMetros  <-- representa un intervalo que va desde un metro a tres metros con pasos de un metro"
 
-	self assert: (oneMeter to: threeMeters) equals:
-		(Interval newFrom: #(oneMeter twoMeters threeMeters))! !
+	| anInterval | 
+
+	anInterval := oneMeter to: threeMeters.
+	
+	self assert: (anInterval at: 1) equals: oneMeter.
+	self assert: (anInterval at: 2) equals: twoMeters .
+	self assert: (anInterval at: 3) equals: threeMeters.
+
+		! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 18:32:35'!
+test14
+	"unMetro to: diezKilometros by: cincoCentimetros <-- representa un intervalo que va de un metro a diez kilometors cada cinco centimetros"
+
+	| anInterval | 
+
+	anInterval := oneMeter to: tenKilometers by: fiveCentimeters.
+	
+	self assert: anInterval first equals: oneMeter.
+	self assert: (anInterval at: 2) equals: oneMeter + fiveCentimeters.
+	self assert: (anInterval at: 3) equals: oneMeter + (2 * fiveCentimeters).
+	self assert: anInterval last equals: tenKilometers.
+	
+	self assert: anInterval size equals: 199981.
+
+		! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 19:07:21'!
+test15
+	"unMetro to: diezKilometros by: cincoCentimetros do:[...] <-- permite recorrer el intervalo"
+
+	| count | 
+
+	count := 0.
+	
+	oneMeter to: tenKilometers by: fiveCentimeters do: [ :aDistance | count := count + 1].
+	
+	self assert: count equals: 199981.
+
+		! !
 
 
-!DistanceTest methodsFor: 'setup' stamp: 'PV 5/28/2017 12:09:30'!
+!DistanceTest methodsFor: 'setup' stamp: 'NC 5/28/2017 17:59:27'!
 setUp
 
 	oneMeter :=  self meters: 1.
@@ -104,7 +144,8 @@ setUp
 	oneHundredCentimeters := self centimeters: 100.
 	zeroCentimeters := self centimeters: 0.
 	ninetyCentimeters := self centimeters: 90.
-
+	fiveCentimeters := self centimeters: 5.
+	
 	oneThousandMilimeters := self milimeters: 1000.
 	oneHundredMilimeters := self milimeters: 100.
 	zeroMilimeters := self milimeters: 0.
@@ -141,10 +182,10 @@ Object subclass: #Distance
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 10:22:57'!
+!Distance methodsFor: 'arithmetic' stamp: 'NC 5/28/2017 18:50:39'!
 * aMultiplier
 
-	magnitude := magnitude * aMultiplier! !
+	^ self class magnitude: magnitude * aMultiplier unit: unit! !
 
 !Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 10:23:01'!
 + aDistance
@@ -161,13 +202,13 @@ Object subclass: #Distance
 
 	magnitude := magnitude / aDivider! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 11:40:07'!
+!Distance methodsFor: 'arithmetic' stamp: 'NC 5/28/2017 18:50:52'!
 adaptToNumber: aMultiplier andSend: anOperationSymbol
 
 	anOperationSymbol = #* ifFalse: [
 		self error: 'Distance only knows how to adapt to a number when the operation is the multiplication' ].
 
-	magnitude := magnitude * aMultiplier! !
+	^ self class magnitude: magnitude * aMultiplier unit: unit.! !
 
 
 !Distance methodsFor: 'comparing' stamp: 'PV 5/28/2017 12:19:56'!
@@ -221,6 +262,23 @@ to: aDistance
 
 	^ DistanceInterval from: self to: aDistance ! !
 
+!Distance methodsFor: 'stepping' stamp: 'NC 5/28/2017 18:02:13'!
+to: aDistance by: anotherDistance
+
+	^ DistanceInterval from: self to: aDistance by: anotherDistance! !
+
+!Distance methodsFor: 'stepping' stamp: 'NC 5/28/2017 19:10:01'!
+to: aDistance by: anotherDistance do: aBlock
+		
+	(DistanceInterval from: self to: aDistance by: anotherDistance) do: aBlock
+	! !
+
+
+!Distance methodsFor: 'accessing' stamp: 'NC 5/28/2017 17:17:35'!
+unit
+	
+	^ unit! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Distance class' category: #'Distance-Solution'!
@@ -231,6 +289,11 @@ Distance class
 magnitude: aMagnitude unit: aUnit
 	
 	^ self new initializeWithMagnitude: aMagnitude andUnit: aUnit! !
+
+!Distance class methodsFor: 'initialization' stamp: 'NC 5/28/2017 18:15:59'!
+magnitudeInMeters: aMagnitude unit: aUnit
+	
+	^ self new initializeWithMagnitude: aMagnitude / (aUnit distanceInMeters)  andUnit: aUnit! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
@@ -248,10 +311,47 @@ oneCentimeter
 
 !classDefinition: #DistanceInterval category: #'Distance-Solution'!
 Object subclass: #DistanceInterval
-	instanceVariableNames: ''
+	instanceVariableNames: 'interval unit'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:16:49'!
+at: aPosition
+
+	| elementInInterval | 
+	
+	elementInInterval := interval at: aPosition.
+	
+	^ Distance magnitudeInMeters: elementInInterval unit: unit.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:33:23'!
+first
+	
+	^ Distance magnitudeInMeters: interval first unit: unit.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:33:28'!
+last
+	
+	^ Distance magnitudeInMeters: interval last unit: unit.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:20:41'!
+size
+	 
+	^ interval size! !
+
+
+!DistanceInterval methodsFor: 'enumerating' stamp: 'NC 5/28/2017 19:13:00'!
+do: aBlock
+
+	interval do: [ :aMagnitude | aBlock value: (Distance magnitudeInMeters: aMagnitude unit: unit) ]! !
+
+
+!DistanceInterval methodsFor: 'initialization' stamp: 'NC 5/28/2017 17:19:25'!
+initializeWithInterval: anInterval andUnit: aUnit
+	
+	interval := anInterval.
+	unit := aUnit! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -259,15 +359,29 @@ Object subclass: #DistanceInterval
 DistanceInterval class
 	instanceVariableNames: ''!
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/28/2017 12:57:52'!
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/28/2017 18:57:39'!
 from: startDistance to: stopDistance 
+	
+	^ self from: startDistance to: stopDistance by: (Distance magnitude: 1 unit: startDistance unit)
+! !
 
-	self shouldBeImplemented! !
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/28/2017 18:04:07'!
+from: startDistance to: stopDistance by: stepDistance
+
+	| newInterval startInMeters stopInMeters stepInMeters |
+	
+	newInterval := self new.
+	startInMeters := startDistance distanceInMeters.
+	stopInMeters := stopDistance distanceInMeters.
+	stepInMeters := stepDistance distanceInMeters.
+	newInterval initializeWithInterval: (Interval from: startInMeters to: stopInMeters by: stepInMeters) andUnit: stepDistance unit.
+	
+	^ newInterval! !
 
 
 !classDefinition: #DistanceUnit category: #'Distance-Solution'!
 Object subclass: #DistanceUnit
-	instanceVariableNames: ''
+	instanceVariableNames: 'interval unit'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
