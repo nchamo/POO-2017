@@ -31,31 +31,31 @@ test04OneHundredCentimetersEqualsOneThousandMilimeters
 
 	self assert: oneHundredCentimeters equals: oneThousandMilimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/26/2017 04:56:37'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:01:16'!
 test05
 	"dosMetros - cienCentimetros = milMilimetros"
 
-	self assert: twoMeters - oneHundredCentimeters = oneThousandMilimeters! !
+	self assert: twoMeters - oneHundredCentimeters equals: oneThousandMilimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/26/2017 05:14:22'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:02'!
 test06
 
-	self assert: oneThousandMilimeters = oneHundredCentimeters ! !
+	self assert: oneThousandMilimeters equals: oneHundredCentimeters ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/26/2017 05:20:36'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:14'!
 test07
 
-	self assert: oneMeter - oneMeter = zeroMilimeters ! !
+	self assert: oneMeter - oneMeter equals: zeroMilimeters ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/26/2017 05:33:35'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:23'!
 test08
 
-	self assert: oneMeter + oneHundredCentimeters = twoMeters! !
+	self assert: oneMeter + oneHundredCentimeters equals: twoMeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/26/2017 05:38:35'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:32'!
 test09
 
-	self assert: oneHundredMilimeters + oneHundredMilimeters  = twoHundredMilimeters! !
+	self assert: oneHundredMilimeters + oneHundredMilimeters  equals: twoHundredMilimeters! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 00:53:25'!
 test10
@@ -71,21 +71,39 @@ test11
 	! !
 
 
-!DistanceTest methodsFor: 'setup' stamp: 'NC 5/28/2017 00:54:51'!
+!DistanceTest methodsFor: 'setup' stamp: 'PV 5/28/2017 10:22:24'!
 setUp
 
-	oneMeter := Meter withLength: 1.
-	oneHundredCentimeters := Centimeter withLength: 100.
-	oneThousandMilimeters := Milimeters withLength: 1000.
-	twoMeters := Meter withLength: 2.
-	zeroMeters := Meter withLength: 0.
-	zeroCentimeters := Centimeter withLength: 0.
-	ninetyCentimeters := Centimeter withLength: 90.
-	oneHundredMilimeters := Milimeters withLength: 100.
-	zeroMilimeters := Milimeters withLength: 0.
-	anotherMeter := Meter withLength: 1.
-	twoHundredMilimeters := Milimeters withLength: 200.
-	oneHalfMeter := Meter withLength: 0.5.! !
+	oneMeter :=  self meters: 1.
+	anotherMeter := self meters: 1.
+	twoMeters := self meters: 2.
+	zeroMeters := self meters: 0.
+	oneHalfMeter := self meters: 0.5.
+
+	oneHundredCentimeters := self centimeters: 100.
+	zeroCentimeters := self centimeters: 0.
+	ninetyCentimeters := self centimeters: 90.
+
+	oneThousandMilimeters := self milimeters: 1000.
+	oneHundredMilimeters := self milimeters: 100.
+	zeroMilimeters := self milimeters: 0.
+	twoHundredMilimeters := self milimeters: 200.! !
+
+
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 09:45:20'!
+centimeters: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Centimeter! !
+
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 09:45:27'!
+meters: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Meter! !
+
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 09:45:15'!
+milimeters: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Milimeter! !
 
 
 !classDefinition: #Distance category: #'Distance-Solution'!
@@ -95,131 +113,56 @@ Object subclass: #Distance
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Distance methodsFor: 'arithmetic' stamp: 'NC 5/28/2017 00:50:48'!
-* aNumber
+!Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 10:22:57'!
+* aMultiplier
 
-	^ Meter withLength: self toMeter length * aNumber! !
+	magnitude := magnitude * aMultiplier! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'PV 5/26/2017 05:46:48'!
+!Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 10:23:01'!
 + aDistance
 
-	^ Meter withLength: self toMeter length + aDistance toMeter length! !
+	^ self class magnitude: self distanceInMeters + aDistance distanceInMeters unit: Meter! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'PV 5/26/2017 05:48:18'!
+!Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 10:03:50'!
 - aDistance
 
-	^ Meter withLength: self toMeter length - aDistance toMeter length! !
+	^ self class magnitude: self distanceInMeters - aDistance distanceInMeters unit: Meter! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'NC 5/28/2017 00:55:48'!
-/ aNumber
+!Distance methodsFor: 'arithmetic' stamp: 'PV 5/28/2017 10:08:32'!
+/ aDivider
 
-	^ Meter withLength: self toMeter length / aNumber! !
+	magnitude := magnitude / aDivider! !
 
 
-!Distance methodsFor: 'comparing' stamp: 'PV 5/26/2017 05:42:44'!
+!Distance methodsFor: 'comparing' stamp: 'PV 5/28/2017 10:23:20'!
 = aDistance
 
-	^ self toMeter length = aDistance toMeter length! !
+	^ self distanceInMeters = aDistance distanceInMeters! !
 
 
-!Distance methodsFor: 'accessing' stamp: 'NC 5/28/2017 01:24:20'!
-length
-	"Return the magnitude of the distance, in this unit."
+!Distance methodsFor: 'initialization' stamp: 'PV 5/28/2017 10:17:39'!
+initializeWithMagnitude: aMagnitude andUnit: aUnit
 
-	^ magnitude! !
-
-
-!classDefinition: #Centimeter category: #'Distance-Solution'!
-Distance subclass: #Centimeter
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
-
-!Centimeter methodsFor: 'initialization' stamp: 'NC 5/28/2017 01:16:38'!
-initializeWithLength: aLength 
-	
-	magnitude := aLength! !
+	magnitude := aMagnitude.
+	unit := aUnit.
+	! !
 
 
-!Centimeter methodsFor: 'converting' stamp: 'NC 5/28/2017 01:17:34'!
-toMeter
-	"Convert this unit to meters"
-	
-	^ Meter withLength: magnitude / 100! !
+!Distance methodsFor: 'converting' stamp: 'PV 5/28/2017 09:11:39'!
+distanceInMeters
+
+	^ magnitude * unit distanceInMeters! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Centimeter class' category: #'Distance-Solution'!
-Centimeter class
+!classDefinition: 'Distance class' category: #'Distance-Solution'!
+Distance class
 	instanceVariableNames: ''!
 
-!Centimeter class methodsFor: 'class initialization' stamp: 'NC 5/20/2017 13:01:44'!
-withLength: aLength 
+!Distance class methodsFor: 'initialization' stamp: 'PV 5/28/2017 10:23:41'!
+magnitude: aMagnitude unit: aUnit
 	
-	^ self new initializeWithLength: aLength! !
-
-
-!classDefinition: #Meter category: #'Distance-Solution'!
-Distance subclass: #Meter
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
-
-!Meter methodsFor: 'initialization' stamp: 'NC 5/28/2017 01:16:18'!
-initializeWithLength: aLength 
-	
-	magnitude := aLength! !
-
-
-!Meter methodsFor: 'converting' stamp: 'NC 5/20/2017 13:06:11'!
-toMeter
-	"Convert this unit to meters"
-	
-	^ self! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Meter class' category: #'Distance-Solution'!
-Meter class
-	instanceVariableNames: ''!
-
-!Meter class methodsFor: 'class initialization' stamp: 'NC 5/20/2017 12:17:18'!
-withLength: aLength 
-	
-	^ self new initializeWithLength: aLength! !
-
-
-!classDefinition: #Milimeters category: #'Distance-Solution'!
-Distance subclass: #Milimeters
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
-
-!Milimeters methodsFor: 'initialization' stamp: 'NC 5/28/2017 01:15:48'!
-initializeWithLength: aLength 
-	
-	magnitude := aLength! !
-
-
-!Milimeters methodsFor: 'converting' stamp: 'NC 5/28/2017 01:17:42'!
-toMeter
-	"Convert this unit to meters"
-	
-	^ Meter withLength: magnitude / 1000! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Milimeters class' category: #'Distance-Solution'!
-Milimeters class
-	instanceVariableNames: ''!
-
-!Milimeters class methodsFor: 'class initialization' stamp: 'NC 5/20/2017 13:24:43'!
-withLength: aLength 
-	
-	^ self new initializeWithLength: aLength! !
+	^ self new initializeWithMagnitude: aMagnitude andUnit: aUnit! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
@@ -229,7 +172,83 @@ Object subclass: #DistanceFactory
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceFactory methodsFor: 'distance creation' stamp: 'NC 5/28/2017 01:28:35'!
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/28/2017 10:24:12'!
 oneCentimeter
- 
+
 	^ Centimeter withLength: 1! !
+
+
+!classDefinition: #DistanceUnit category: #'Distance-Solution'!
+Object subclass: #DistanceUnit
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'DistanceUnit class' category: #'Distance-Solution'!
+DistanceUnit class
+	instanceVariableNames: ''!
+
+!DistanceUnit class methodsFor: 'as yet unclassified' stamp: 'PV 5/28/2017 10:13:52'!
+distanceInMeters
+
+	self shouldBeImplemented! !
+
+
+!classDefinition: #Centimeter category: #'Distance-Solution'!
+DistanceUnit subclass: #Centimeter
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Centimeter class' category: #'Distance-Solution'!
+Centimeter class
+	instanceVariableNames: ''!
+
+!Centimeter class methodsFor: 'converting' stamp: 'PV 5/28/2017 09:55:01'!
+distanceInMeters
+
+	^ 1/100! !
+
+
+!classDefinition: #Meter category: #'Distance-Solution'!
+DistanceUnit subclass: #Meter
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Meter class' category: #'Distance-Solution'!
+Meter class
+	instanceVariableNames: ''!
+
+!Meter class methodsFor: 'converting' stamp: 'PV 5/28/2017 09:12:21'!
+distanceInMeters
+
+	^ 1! !
+
+
+!classDefinition: #Milimeter category: #'Distance-Solution'!
+DistanceUnit subclass: #Milimeter
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Milimeter class' category: #'Distance-Solution'!
+Milimeter class
+	instanceVariableNames: ''!
+
+!Milimeter class methodsFor: 'converting' stamp: 'PV 5/28/2017 09:56:41'!
+distanceInMeters
+
+	^ 1/1000! !
