@@ -36,11 +36,8 @@ unit
 	^ unit! !
 
 
-!DistanceInterval methodsFor: 'enumerating' stamp: 'PV 5/30/2017 16:57:21'!
+!DistanceInterval methodsFor: 'enumerating' stamp: 'NC 5/30/2017 18:51:02'!
 do: aBlock
-
-	"me tira error si descomento la línea de abajo, wtf?"
-	"self toDo: 'por qué no puedo eliminar este método?'."
 
 	interval do: [ :aMagnitude | aBlock value: (Distance magnitudeInMeters: aMagnitude unit: unit) ]! !
 
