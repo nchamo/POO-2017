@@ -74,23 +74,23 @@ initializeWithInterval: anInterval andUnit: aUnit
 DistanceInterval class
 	instanceVariableNames: ''!
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/30/2017 06:04:38'!
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/30/2017 17:21:19'!
 from: startDistance to: stopDistance
-
-	self toDo: 'verificar que start y stop tengan la misma unidad'.
 
 	^ self from: startDistance to: stopDistance by: (Distance magnitude: 1 unit: startDistance unit)
 ! !
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/30/2017 16:03:39'!
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/30/2017 17:20:33'!
 from: startDistance to: stopDistance by: stepDistance
-	| unit |
-
-	self toDo: 'verificar que start < stop y step <= stop - start'.
-
 	"unMetro to: diezKilometros by: cincoCentimetros
 	from: 1 to: 10000 by: 0.05 unit: centimetros
 	"
+	
+	| unit |
+	
+	stopDistance < startDistance ifTrue: [self error: self endShouldBeBiggerThatStartMessageDescription.].
+
+	
 "
 	^ self interval:
 		(Interval
@@ -114,6 +114,12 @@ from: startDistance to: stopDistance by: stepDistance
 interval: anInterval unit: aDistanceUnit
 
 	^ self new initializeWithInterval: anInterval andUnit: aDistanceUnit ! !
+
+
+!DistanceInterval class methodsFor: 'error messages' stamp: 'NC 5/30/2017 17:21:03'!
+endShouldBeBiggerThatStartMessageDescription
+
+	^ 'End of the interval should be bigger that start'! !
 
 
 !classDefinition: #DistanceTest category: #'Distance-Solution'!
@@ -249,6 +255,22 @@ test16DistanceIntervalBehavesLikeAnInterval
 
 	self assert: aDistanceInterval + oneMeter equals: plusOneMeter.
 	self assert: aDistanceInterval - oneMeter equals: minusOneMeter.! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 17:16:55'!
+test17CantCreateNegativeDistance
+
+	self should: [ Distance magnitude: -1 unit: Meter. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: Distance negativeErrorMessageDescription ]! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 17:19:05'!
+test18IntervalEndIsBiggerThanStart
+
+	self should: [ DistanceInterval from: oneMeter to: oneHalfMeter ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: DistanceInterval endShouldBeBiggerThatStartMessageDescription]! !
 
 
 !DistanceTest methodsFor: 'setup' stamp: 'NC 5/28/2017 17:59:27'!
@@ -430,15 +452,23 @@ unit
 Distance class
 	instanceVariableNames: ''!
 
-!Distance class methodsFor: 'initialization' stamp: 'PV 5/28/2017 10:23:41'!
+!Distance class methodsFor: 'initialization' stamp: 'NC 5/30/2017 17:16:06'!
 magnitude: aMagnitude unit: aUnit
+	
+	aMagnitude < 0  ifTrue: [self error: self negativeErrorMessageDescription].
 	
 	^ self new initializeWithMagnitude: aMagnitude andUnit: aUnit! !
 
-!Distance class methodsFor: 'initialization' stamp: 'PV 5/30/2017 06:22:51'!
+!Distance class methodsFor: 'initialization' stamp: 'NC 5/30/2017 17:13:20'!
 magnitudeInMeters: aMagnitudeInMeters unit: aUnit
 	
-	^ self new initializeWithMagnitude: aMagnitudeInMeters / (aUnit distanceInMeters)  andUnit: aUnit! !
+	^ self magnitude: aMagnitudeInMeters / (aUnit distanceInMeters)  unit: aUnit! !
+
+
+!Distance class methodsFor: 'error messages' stamp: 'NC 5/30/2017 17:12:34'!
+negativeErrorMessageDescription
+
+	^ 'No se puede crear una distancia negativa'! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
