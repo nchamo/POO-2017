@@ -1,5 +1,5 @@
 !classDefinition: #DistanceInterval category: #'Distance-Solution'!
-Interval subclass: #DistanceInterval
+SequenceableCollection subclass: #DistanceInterval
 	instanceVariableNames: 'interval unit'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -80,7 +80,7 @@ from: startDistance to: stopDistance
 	^ self from: startDistance to: stopDistance by: (Distance magnitude: 1 unit: startDistance unit)
 ! !
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/30/2017 17:20:33'!
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/30/2017 18:46:01'!
 from: startDistance to: stopDistance by: stepDistance
 	"unMetro to: diezKilometros by: cincoCentimetros
 	from: 1 to: 10000 by: 0.05 unit: centimetros
@@ -89,15 +89,6 @@ from: startDistance to: stopDistance by: stepDistance
 	| unit |
 	
 	stopDistance < startDistance ifTrue: [self error: self endShouldBeBiggerThatStartMessageDescription.].
-
-	
-"
-	^ self interval:
-		(Interval
-			from: startDistance distanceInMeters
-			to: stopDistance distanceInMeters
-			by: stepDistance distanceInMeters)
-		unit: stepDistance unit"
 
 	unit := stepDistance unit.
 
@@ -161,42 +152,42 @@ test05TwoMetersMinusOneHundredCentimetersEqualsOneThousandMilimeters
 
 	self assert: twoMeters - oneHundredCentimeters equals: oneThousandMilimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:02'!
-test06
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:42:07'!
+test06OneThousandMilimetersEqualsOneHoundredCentimeters
 
 	self assert: oneThousandMilimeters equals: oneHundredCentimeters ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:14'!
-test07
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:42:23'!
+test07OneMeterMinusOneMeterEqualsZeroMilimeters
 
 	self assert: oneMeter - oneMeter equals: zeroMilimeters ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:23'!
-test08
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:42:44'!
+test08OneMeterPlusOneHundrerCentimeterEqualsTwoMeters
 
 	self assert: oneMeter + oneHundredCentimeters equals: twoMeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:04:32'!
-test09
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:43:15'!
+test09OneHoundredMilimetersPlusOneHundredMilimetersEqualsTwoHundrerMilimeters
 
-	self assert: oneHundredMilimeters + oneHundredMilimeters  equals: twoHundredMilimeters! !
+	self assert: oneHundredMilimeters + oneHundredMilimeters equals: twoHundredMilimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 18:44:32'!
-test10
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:43:37'!
+test10ProductWithNumbersAreCorrect
 	"unMetro * 2 = dosMetros
 	2 * unMetro = dosMetros"
 
 	self assert: oneMeter * 2 equals: twoMeters.
 	self assert: 2 * oneMeter equals: twoMeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 11:35:54'!
-test11
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:43:52'!
+test11DivisionByNumberWorks
 	"unMetro / 2 = unMedioMetro"
 
 	self assert: oneMeter / 2 equals: oneHalfMeter! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 12:27:34'!
-test12
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:44:03'!
+test12InequalityRelations
 	"diezKilometros > unMetro"
 	self assert: tenKilometers > oneMeter.
 
@@ -209,14 +200,14 @@ test12
 	"unMetro <= tresMetros"
 	self assert: oneMeter <= threeMeters.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/29/2017 23:19:01'!
-test13
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:44:27'!
+test13IntervalIsCorrect
 	"unMetro to: tresMetros  <-- representa un intervalo que va desde un metro a tres metros con pasos de un metro"
 
 	self assert: ((oneMeter to: threeMeters) as: Array) equals: {oneMeter. twoMeters. threeMeters}! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 05:51:07'!
-test14
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:44:52'!
+test14IntervalWithByIsCorrect
 	"unMetro to: diezKilometros by: cincoCentimetros <-- representa un intervalo que va de un metro a diez kilometors cada cinco centimetros"
 
 	| aDistanceInterval |
@@ -231,8 +222,8 @@ test14
 	self assert: aDistanceInterval size equals:
 		(self equivalentIntervalFromStart: oneMeter stop: tenKilometers step: fiveCentimeters) size.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 05:48:25'!
-test15
+!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:45:00'!
+test15IntervalIterationWorks
 	"unMetro to: diezKilometros by: cincoCentimetros do:[...] <-- permite recorrer el intervalo"
 
 	| count | 
@@ -317,7 +308,7 @@ milimeters: aMagnitude
 	^ DistanceFactory new milimeters: aMagnitude! !
 
 
-!DistanceTest methodsFor: 'Private' stamp: 'PV 5/30/2017 05:49:14'!
+!DistanceTest methodsFor: 'private' stamp: 'PV 5/30/2017 05:49:14'!
 equivalentIntervalFromStart: startDistance stop: stopDistance step: stepDistance
 
 	^ Interval from: (startDistance distanceIn: stepDistance unit)
