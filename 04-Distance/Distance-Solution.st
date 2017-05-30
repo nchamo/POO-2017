@@ -1,3 +1,121 @@
+!classDefinition: #DistanceInterval category: #'Distance-Solution'!
+Interval subclass: #DistanceInterval
+	instanceVariableNames: 'interval unit'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Distance-Solution'!
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:05:59'!
+at: aPosition
+
+	^ Distance magnitude: (interval at: aPosition) unit: unit.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:05:07'!
+first
+
+	^ Distance magnitude: interval first unit: unit! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:16:16'!
+interval
+
+	^ interval! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:06:20'!
+last
+	
+	^ Distance magnitude: interval last unit: unit.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:20:41'!
+size
+	 
+	^ interval size! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:17:17'!
+unit
+
+	^ unit! !
+
+
+!DistanceInterval methodsFor: 'enumerating' stamp: 'PV 5/30/2017 16:57:21'!
+do: aBlock
+
+	"me tira error si descomento la línea de abajo, wtf?"
+	"self toDo: 'por qué no puedo eliminar este método?'."
+
+	interval do: [ :aMagnitude | aBlock value: (Distance magnitudeInMeters: aMagnitude unit: unit) ]! !
+
+
+!DistanceInterval methodsFor: 'initialization' stamp: 'NC 5/28/2017 17:19:25'!
+initializeWithInterval: anInterval andUnit: aUnit
+	
+	interval := anInterval.
+	unit := aUnit! !
+
+
+!DistanceInterval methodsFor: 'arithmetic' stamp: 'PV 5/30/2017 16:10:37'!
++ aDistance
+
+	^ self class interval: interval + (aDistance distanceIn: unit) unit: unit! !
+
+!DistanceInterval methodsFor: 'arithmetic' stamp: 'PV 5/30/2017 16:18:22'!
+- aDistance
+
+	^ self class interval: interval - (aDistance distanceIn: unit) unit: unit! !
+
+
+!DistanceInterval methodsFor: 'comparing' stamp: 'PV 5/30/2017 16:16:57'!
+= aDistanceInterval
+
+	^ aDistanceInterval interval = interval and: aDistanceInterval unit = unit! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'DistanceInterval class' category: #'Distance-Solution'!
+DistanceInterval class
+	instanceVariableNames: ''!
+
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/30/2017 06:04:38'!
+from: startDistance to: stopDistance
+
+	self toDo: 'verificar que start y stop tengan la misma unidad'.
+
+	^ self from: startDistance to: stopDistance by: (Distance magnitude: 1 unit: startDistance unit)
+! !
+
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/30/2017 16:03:39'!
+from: startDistance to: stopDistance by: stepDistance
+	| unit |
+
+	self toDo: 'verificar que start < stop y step <= stop - start'.
+
+	"unMetro to: diezKilometros by: cincoCentimetros
+	from: 1 to: 10000 by: 0.05 unit: centimetros
+	"
+"
+	^ self interval:
+		(Interval
+			from: startDistance distanceInMeters
+			to: stopDistance distanceInMeters
+			by: stepDistance distanceInMeters)
+		unit: stepDistance unit"
+
+	unit := stepDistance unit.
+
+	^ self interval:
+		(Interval
+			from: (startDistance distanceIn: unit)
+			to: (stopDistance distanceIn: unit)
+			by: stepDistance magnitude)
+		unit: unit
+		
+! !
+
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/30/2017 15:49:38'!
+interval: anInterval unit: aDistanceUnit
+
+	^ self new initializeWithInterval: anInterval andUnit: aDistanceUnit ! !
+
+
 !classDefinition: #DistanceTest category: #'Distance-Solution'!
 TestCase subclass: #DistanceTest
 	instanceVariableNames: 'oneMeter oneHundredCentimeters oneThousandMilimeters twoMeters zeroMeters zeroCentimeters ninetyCentimeters oneHundredMilimeters zeroMilimeters anotherMeter twoHundredMilimeters oneHalfMeter tenKilometers threeMeters fiveCentimeters'
@@ -31,8 +149,8 @@ test04OneHundredCentimetersEqualsOneThousandMilimeters
 
 	self assert: oneHundredCentimeters equals: oneThousandMilimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/28/2017 10:01:16'!
-test05
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 14:28:25'!
+test05TwoMetersMinusOneHundredCentimetersEqualsOneThousandMilimeters
 	"dosMetros - cienCentimetros = milMilimetros"
 
 	self assert: twoMeters - oneHundredCentimeters equals: oneThousandMilimeters! !
@@ -85,38 +203,29 @@ test12
 	"unMetro <= tresMetros"
 	self assert: oneMeter <= threeMeters.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 17:09:47'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/29/2017 23:19:01'!
 test13
 	"unMetro to: tresMetros  <-- representa un intervalo que va desde un metro a tres metros con pasos de un metro"
 
-	| anInterval | 
+	self assert: ((oneMeter to: threeMeters) as: Array) equals: {oneMeter. twoMeters. threeMeters}! !
 
-	anInterval := oneMeter to: threeMeters.
-	
-	self assert: (anInterval at: 1) equals: oneMeter.
-	self assert: (anInterval at: 2) equals: twoMeters .
-	self assert: (anInterval at: 3) equals: threeMeters.
-
-		! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 18:32:35'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 05:51:07'!
 test14
 	"unMetro to: diezKilometros by: cincoCentimetros <-- representa un intervalo que va de un metro a diez kilometors cada cinco centimetros"
 
-	| anInterval | 
+	| aDistanceInterval |
 
-	anInterval := oneMeter to: tenKilometers by: fiveCentimeters.
+	aDistanceInterval := oneMeter to: tenKilometers by: fiveCentimeters.
 	
-	self assert: anInterval first equals: oneMeter.
-	self assert: (anInterval at: 2) equals: oneMeter + fiveCentimeters.
-	self assert: (anInterval at: 3) equals: oneMeter + (2 * fiveCentimeters).
-	self assert: anInterval last equals: tenKilometers.
+	self assert: aDistanceInterval first equals: oneMeter.
+	self assert: (aDistanceInterval at: 2) equals: oneMeter + fiveCentimeters.
+	self assert: (aDistanceInterval at: 3) equals: oneMeter + (2 * fiveCentimeters).
+	self assert: aDistanceInterval last equals: tenKilometers.
 	
-	self assert: anInterval size equals: 199981.
+	self assert: aDistanceInterval size equals:
+		(self equivalentIntervalFromStart: oneMeter stop: tenKilometers step: fiveCentimeters) size.! !
 
-		! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/28/2017 19:07:21'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 05:48:25'!
 test15
 	"unMetro to: diezKilometros by: cincoCentimetros do:[...] <-- permite recorrer el intervalo"
 
@@ -126,9 +235,20 @@ test15
 	
 	oneMeter to: tenKilometers by: fiveCentimeters do: [ :aDistance | count := count + 1].
 	
-	self assert: count equals: 199981.
+	self assert: count equals:
+		(self equivalentIntervalFromStart: oneMeter stop: tenKilometers step: fiveCentimeters) size.! !
 
-		! !
+!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 16:50:22'!
+test16DistanceIntervalBehavesLikeAnInterval
+
+	| aDistanceInterval plusOneMeter minusOneMeter |
+	
+	aDistanceInterval := oneMeter to: tenKilometers by: fiveCentimeters.
+	plusOneMeter := oneMeter + oneMeter to: tenKilometers + oneMeter by: fiveCentimeters.
+	minusOneMeter := oneMeter - oneMeter to: tenKilometers - oneMeter by: fiveCentimeters.
+
+	self assert: aDistanceInterval + oneMeter equals: plusOneMeter.
+	self assert: aDistanceInterval - oneMeter equals: minusOneMeter.! !
 
 
 !DistanceTest methodsFor: 'setup' stamp: 'NC 5/28/2017 17:59:27'!
@@ -154,25 +274,33 @@ setUp
 	tenKilometers := self kilometers: 10.! !
 
 
-!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 09:45:20'!
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/30/2017 15:01:18'!
 centimeters: aMagnitude
 
-	^ Distance magnitude: aMagnitude unit: Centimeter! !
+	^ DistanceFactory new centimeters: aMagnitude! !
 
-!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 12:00:37'!
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/30/2017 15:02:51'!
 kilometers: aMagnitude
 
-	^ Distance magnitude: aMagnitude unit: Kilometer! !
+	^ DistanceFactory new kilometers: aMagnitude! !
 
-!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 09:45:27'!
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/30/2017 15:01:45'!
 meters: aMagnitude
 
-	^ Distance magnitude: aMagnitude unit: Meter! !
+	^ DistanceFactory new meters: aMagnitude! !
 
-!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/28/2017 09:45:15'!
+!DistanceTest methodsFor: 'distance instances creation' stamp: 'PV 5/30/2017 15:02:39'!
 milimeters: aMagnitude
 
-	^ Distance magnitude: aMagnitude unit: Milimeter! !
+	^ DistanceFactory new milimeters: aMagnitude! !
+
+
+!DistanceTest methodsFor: 'Private' stamp: 'PV 5/30/2017 05:49:14'!
+equivalentIntervalFromStart: startDistance stop: stopDistance step: stepDistance
+
+	^ Interval from: (startDistance distanceIn: stepDistance unit)
+		to: (stopDistance distanceIn: stepDistance unit)
+		by: stepDistance magnitude! !
 
 
 !classDefinition: #Distance category: #'Distance-Solution'!
@@ -245,10 +373,15 @@ initializeWithMagnitude: aMagnitude andUnit: aUnit
 	! !
 
 
-!Distance methodsFor: 'converting' stamp: 'PV 5/28/2017 09:11:39'!
+!Distance methodsFor: 'converting' stamp: 'PV 5/30/2017 00:07:33'!
+distanceIn: aDistanceUnit
+
+	^ magnitude * unit distanceInMeters / aDistanceUnit distanceInMeters! !
+
+!Distance methodsFor: 'converting' stamp: 'PV 5/30/2017 06:19:52'!
 distanceInMeters
 
-	^ magnitude * unit distanceInMeters! !
+	^ self distanceIn: Meter! !
 
 
 !Distance methodsFor: 'private' stamp: 'PV 5/28/2017 12:19:37'!
@@ -273,6 +406,18 @@ to: aDistance by: anotherDistance do: aBlock
 	(DistanceInterval from: self to: aDistance by: anotherDistance) do: aBlock
 	! !
 
+!Distance methodsFor: 'stepping' stamp: 'PV 5/30/2017 15:30:58'!
+to: stopDistance count: n
+	"Answer aDistanceInterval from the receiver up to the argument, stopDistance, 
+	with n elements."
+
+	^ DistanceInterval from: self to: stopDistance count: n! !
+
+
+!Distance methodsFor: 'accessing' stamp: 'PV 5/29/2017 23:58:10'!
+magnitude
+
+	^ magnitude ! !
 
 !Distance methodsFor: 'accessing' stamp: 'NC 5/28/2017 17:17:35'!
 unit
@@ -290,10 +435,10 @@ magnitude: aMagnitude unit: aUnit
 	
 	^ self new initializeWithMagnitude: aMagnitude andUnit: aUnit! !
 
-!Distance class methodsFor: 'initialization' stamp: 'NC 5/28/2017 18:15:59'!
-magnitudeInMeters: aMagnitude unit: aUnit
+!Distance class methodsFor: 'initialization' stamp: 'PV 5/30/2017 06:22:51'!
+magnitudeInMeters: aMagnitudeInMeters unit: aUnit
 	
-	^ self new initializeWithMagnitude: aMagnitude / (aUnit distanceInMeters)  andUnit: aUnit! !
+	^ self new initializeWithMagnitude: aMagnitudeInMeters / (aUnit distanceInMeters)  andUnit: aUnit! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
@@ -303,80 +448,60 @@ Object subclass: #DistanceFactory
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/28/2017 10:24:12'!
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:55:12'!
+centimeters: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Centimeter! !
+
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 15:02:01'!
+kilometers: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Kilometer! !
+
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:55:24'!
+meters: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Meter! !
+
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 15:02:14'!
+milimeters: aMagnitude
+
+	^ Distance magnitude: aMagnitude unit: Milimeter! !
+
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:55:56'!
+minusOneMeter
+
+	^ self meters: -1! !
+
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:56:21'!
 oneCentimeter
 
-	^ Centimeter withLength: 1! !
+	^ self centimeters: 1! !
 
-
-!classDefinition: #DistanceInterval category: #'Distance-Solution'!
-Object subclass: #DistanceInterval
-	instanceVariableNames: 'interval unit'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:58:53'!
+oneHundredCentimeters
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:16:49'!
-at: aPosition
+	^ self centimeters: 100! !
 
-	| elementInInterval | 
-	
-	elementInInterval := interval at: aPosition.
-	
-	^ Distance magnitudeInMeters: elementInInterval unit: unit.! !
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:58:34'!
+oneMeter
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:33:23'!
-first
-	
-	^ Distance magnitudeInMeters: interval first unit: unit.! !
+	^ self meters: 1! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:33:28'!
-last
-	
-	^ Distance magnitudeInMeters: interval last unit: unit.! !
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:59:10'!
+twoHundredCentimeters
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:20:41'!
-size
-	 
-	^ interval size! !
+	^ self centimeters: 200! !
 
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:59:23'!
+twoMeters
 
-!DistanceInterval methodsFor: 'enumerating' stamp: 'NC 5/28/2017 19:13:00'!
-do: aBlock
+	^ self meters: 2! !
 
-	interval do: [ :aMagnitude | aBlock value: (Distance magnitudeInMeters: aMagnitude unit: unit) ]! !
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:59:37'!
+zeroMeters
 
-
-!DistanceInterval methodsFor: 'initialization' stamp: 'NC 5/28/2017 17:19:25'!
-initializeWithInterval: anInterval andUnit: aUnit
-	
-	interval := anInterval.
-	unit := aUnit! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'DistanceInterval class' category: #'Distance-Solution'!
-DistanceInterval class
-	instanceVariableNames: ''!
-
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/28/2017 18:57:39'!
-from: startDistance to: stopDistance 
-	
-	^ self from: startDistance to: stopDistance by: (Distance magnitude: 1 unit: startDistance unit)
-! !
-
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 5/28/2017 18:04:07'!
-from: startDistance to: stopDistance by: stepDistance
-
-	| newInterval startInMeters stopInMeters stepInMeters |
-	
-	newInterval := self new.
-	startInMeters := startDistance distanceInMeters.
-	stopInMeters := stopDistance distanceInMeters.
-	stepInMeters := stepDistance distanceInMeters.
-	newInterval initializeWithInterval: (Interval from: startInMeters to: stopInMeters by: stepInMeters) andUnit: stepDistance unit.
-	
-	^ newInterval! !
+	^ self meters: 0! !
 
 
 !classDefinition: #DistanceUnit category: #'Distance-Solution'!
