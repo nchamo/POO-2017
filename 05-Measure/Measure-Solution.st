@@ -21,20 +21,20 @@ unit
 
 	^ self class amount: amount * aMultiplier unit: unit! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:26:23'!
+!Distance methodsFor: 'arithmetic' stamp: 'PV 6/4/2017 08:20:03'!
 + aDistance
 
-	^ self class amount: self distanceInMeters + aDistance distanceInMeters unit: (DistanceUnit withName: 'meter' andDistanceInMeters: 1)! !
+	^ self class amount: self distanceInMeters + aDistance distanceInMeters unit: DistanceUnit meter! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:26:34'!
+!Distance methodsFor: 'arithmetic' stamp: 'PV 6/4/2017 08:20:18'!
 - aDistance
 
-	^ self class amount: self distanceInMeters - aDistance distanceInMeters unit: (DistanceUnit withName: 'meter' andDistanceInMeters: 1)! !
+	^ self class amount: self distanceInMeters - aDistance distanceInMeters unit: DistanceUnit meter! !
 
-!Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:26:39'!
-/ aDivider
+!Distance methodsFor: 'arithmetic' stamp: 'PV 6/4/2017 08:45:02'!
+/ aDividerNumber
 
-	^ self class amount: amount / aDivider unit: unit! !
+	^ self class amount: amount / aDividerNumber unit: unit! !
 
 !Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:26:43'!
 adaptToNumber: aMultiplier andSend: anOperationSymbol
@@ -78,10 +78,10 @@ distanceIn: aDistanceUnit
 
 	^ amount * unit distanceInMeters / aDistanceUnit distanceInMeters! !
 
-!Distance methodsFor: 'converting' stamp: 'NC 6/1/2017 20:54:27'!
+!Distance methodsFor: 'converting' stamp: 'PV 6/4/2017 08:21:06'!
 distanceInMeters
 
-	^ self distanceIn: (DistanceUnit withName: 'meter' andDistanceInMeters: 1)! !
+	^ self distanceIn: DistanceUnit meter! !
 
 
 !Distance methodsFor: 'initialization' stamp: 'NC 6/1/2017 23:29:25'!
@@ -92,12 +92,12 @@ initializeWithAmount: anAmount andUnit: aUnit
 	! !
 
 
-!Distance methodsFor: 'printing' stamp: 'NC 6/1/2017 23:24:24'!
+!Distance methodsFor: 'printing' stamp: 'PV 6/4/2017 10:00:34'!
 printString
 	
 	| string |
 
-	string := amount printString, ' ', unit printString.
+	string := amount printString , ' ' , unit printString.
 	
 	amount = 1 ifFalse: [ string := string, 's' ].
 	
@@ -121,16 +121,6 @@ to: aDistance by: anotherDistance do: aBlock
 	! !
 
 
-!Distance methodsFor: 'testing' stamp: 'NC 6/1/2017 23:11:39'!
-max: aDistance
-	
-	aDistance > self ifTrue: [ ^ aDistance ] ifFalse: [ ^ self ].! !
-
-!Distance methodsFor: 'testing' stamp: 'NC 6/1/2017 23:11:35'!
-min: aDistance
-	
-	aDistance < self ifTrue: [ ^ aDistance ] ifFalse: [ ^ self ].! !
-
 
 !Distance methodsFor: 'private' stamp: 'PV 5/28/2017 12:19:37'!
 compare: aDistance with: anOperatorSymbol
@@ -148,11 +138,6 @@ amount: anAmount unit: aUnit
 	
 	^ self new initializeWithAmount: anAmount andUnit: aUnit! !
 
-!Distance class methodsFor: 'initialization' stamp: 'NC 6/1/2017 23:26:03'!
-amountInMeters: aMagnitudeInMeters unit: aUnit
-	
-	^ self amount: aMagnitudeInMeters / (aUnit distanceInMeters)  unit: aUnit! !
-
 
 !classDefinition: #DistanceInterval category: #'Measure-Solution'!
 Collection subclass: #DistanceInterval
@@ -166,9 +151,14 @@ at: aPosition
 
 	^ Distance amount: (interval at: aPosition) unit: unit.! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/1/2017 23:27:26'!
-first
+!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/1/2017 19:44:08'!
+by
+	
+	^ (self at: 2) - (self at: 1)! !
 
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 6/4/2017 09:34:47'!
+from
+	
 	^ Distance amount: interval first unit: unit! !
 
 !DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:16:16'!
@@ -176,15 +166,15 @@ interval
 
 	^ interval! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/1/2017 23:27:42'!
-last
-	
-	^ Distance amount: interval last unit: unit.! !
-
 !DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:20:41'!
 size
 	 
 	^ interval size! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'PV 6/4/2017 09:34:37'!
+to
+	
+	^ Distance amount: interval last unit: unit! !
 
 !DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:17:17'!
 unit
@@ -192,43 +182,28 @@ unit
 	^ unit! !
 
 
-!DistanceInterval methodsFor: 'arithmetic' stamp: 'PV 5/30/2017 16:10:37'!
-+ aDistance
+!DistanceInterval methodsFor: 'adding' stamp: 'PV 6/4/2017 10:20:11'!
+add: newObject 
+	"Adding to a DistanceInterval is not allowed."
 
-	^ self class interval: interval + (aDistance distanceIn: unit) unit: unit! !
-
-!DistanceInterval methodsFor: 'arithmetic' stamp: 'PV 5/30/2017 16:18:22'!
-- aDistance
-
-	^ self class interval: interval - (aDistance distanceIn: unit) unit: unit! !
+	self shouldNotImplement! !
 
 
-!DistanceInterval methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 19:44:08'!
-by
-	
-	^ (self at: 2) - (self at: 1)! !
-
-!DistanceInterval methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 19:42:33'!
-from
-	
-	^ self first! !
-
-!DistanceInterval methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 19:42:40'!
-to
-	
-	^ self last! !
-
-
-!DistanceInterval methodsFor: 'comparing' stamp: 'PV 5/30/2017 16:16:57'!
+!DistanceInterval methodsFor: 'comparing' stamp: 'PV 6/4/2017 10:13:20'!
 = aDistanceInterval
 
-	^ aDistanceInterval interval = interval and: aDistanceInterval unit = unit! !
+	^ aDistanceInterval from = self from and: [aDistanceInterval to = self to] and: [aDistanceInterval by = self by]! !
+
+!DistanceInterval methodsFor: 'comparing' stamp: 'PV 6/4/2017 09:51:37'!
+hash
+
+	^ self from distanceInMeters * self to distanceInMeters * self by distanceInMeters! !
 
 
-!DistanceInterval methodsFor: 'enumerating' stamp: 'NC 6/1/2017 23:28:09'!
+!DistanceInterval methodsFor: 'enumerating' stamp: 'PV 6/4/2017 10:10:10'!
 do: aBlock
 
-	interval do: [ :aMagnitude | aBlock value: (Distance amountInMeters: aMagnitude unit: unit) ]! !
+	interval do: [ :anAmount | aBlock value: (Distance amount: anAmount unit: unit) ]! !
 
 
 !DistanceInterval methodsFor: 'initialization' stamp: 'NC 5/28/2017 17:19:25'!
@@ -236,6 +211,13 @@ initializeWithInterval: anInterval andUnit: aUnit
 	
 	interval := anInterval.
 	unit := aUnit! !
+
+
+!DistanceInterval methodsFor: 'removing' stamp: 'PV 6/4/2017 10:23:04'!
+remove: oldObject ifAbsent: anExceptionBlock 
+	"SequencableCollections, like DistanceIntervals, cannot implement removing."
+
+	self shouldNotImplement! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -313,13 +295,13 @@ test04EqualsShouldBeCommutative
 ! !
 
 
-!CatedraDistanceTest methodsFor: '2 - Converting/accesing/printing' stamp: 'NC 6/1/2017 23:42:36'!
+!CatedraDistanceTest methodsFor: '2 - Converting/accesing/printing' stamp: 'PV 6/4/2017 07:53:05'!
 test05UnitStringRepresentationShouldBeHumanReadable
 
 	self assert: self meter printString = 'meter'.
 	self assert: self centimeter printString = 'centimeter'.
 	self assert: self decimeter printString = 'decimeter'.
-	self assert: self millimeter printString = 'milimeter'.
+	self assert: self millimeter printString = 'millimeter'.
 	self assert: self decameter printString = 'decameter'.
 	self assert: self hectometer printString = 'hectometer'.
 	self assert: self kilometer printString = 'kilometer'.	! !
@@ -409,11 +391,11 @@ test08aComparingDistancesWithOtherObjectsShouldReturnFalse
 	self deny: self oneMeter = Object new.
 	self deny: Object new = self oneMeter! !
 
-!CatedraDistanceTest methodsFor: '3 - Test equality - implementation details' stamp: 'HernanWilkinson 4/19/2011 10:27'!
+!CatedraDistanceTest methodsFor: '3 - Test equality - implementation details' stamp: 'PV 6/4/2017 08:48:06'!
 test08bDistancesThatAreEqualShouldReturnTheSameHash
 
 	"Debido a como funcionan los diccionarios, cuando dos objetos son iguales deben
-	tener es mismo hash. La inversa no es verdad"
+	tener el mismo hash. La inversa no es verdad"
 	
 	self assert: self oneMeter hash=self oneMeter hash.
 	self assert: self oneMeter hash=self oneHundredCentimeters hash.
@@ -757,20 +739,20 @@ test32DistanceIntervalCanBeEnumeratedWithSpecificStep
 ! !
 
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:59:40'!
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:59:11'!
 centimeter
-	
-	^ DistanceUnit withName: 'centimeter' andDistanceInMeters: 1/100! !
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:58:36'!
+	^ DistanceUnit centimeter! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:56'!
 decameter
 	
-	^ DistanceUnit withName: 'decameter' andDistanceInMeters: 10! !
+	^ DistanceUnit decameter! !
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:59:09'!
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:35'!
 decimeter
 	
-	^ DistanceUnit withName: 'decimeter' andDistanceInMeters: 1/10! !
+	^ DistanceUnit decimeter! !
 
 !CatedraDistanceTest methodsFor: 'distance units' stamp: 'HAW 5/31/2017 12:37:50'!
 distanceUnits 
@@ -787,25 +769,25 @@ distanceUnits
 	
 ! !
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:58:04'!
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:08'!
 hectometer
 	
-	^ DistanceUnit withName: 'hectometer' andDistanceInMeters: 100 ! !
+	^ DistanceUnit hectometer! !
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:56:20'!
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:57:27'!
 kilometer
 	
-	^ DistanceUnit withName: 'kilometer' andDistanceInMeters: 1000! !
+	^ DistanceUnit kilometer! !
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:51:56'!
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:55:15'!
 meter
 	
-	^ DistanceUnit withName: 'meter' andDistanceInMeters: 1! !
+	^ DistanceUnit meter! !
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/1/2017 20:51:41'!
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:52:54'!
 millimeter
 	
-	^ DistanceUnit withName: 'milimeter' andDistanceInMeters: 1/1000! !
+	^ DistanceUnit millimeter! !
 
 
 !CatedraDistanceTest methodsFor: 'distance measures' stamp: 'HAW 5/31/2017 11:20:12'!
@@ -875,35 +857,36 @@ setUp
 
 !classDefinition: #DistanceTest category: #'Measure-Solution'!
 TestCase subclass: #DistanceTest
-	instanceVariableNames: 'oneMeter oneHundredCentimeters oneThousandMilimeters twoMeters zeroMeters zeroCentimeters ninetyCentimeters oneHundredMilimeters zeroMilimeters anotherMeter twoHundredMilimeters oneHalfMeter tenKilometers threeMeters fiveCentimeters'
+	instanceVariableNames: 'oneMeter oneHundredCentimeters oneThousandMillimeters twoMeters zeroMeters zeroCentimeters ninetyCentimeters oneHundredMillimeters zeroMillimeters anotherMeter twoHundredMillimeters oneHalfMeter tenKilometers threeMeters fiveCentimeters fiftyMilimiters'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!DistanceTest methodsFor: 'setup' stamp: 'NC 6/1/2017 23:44:12'!
+!DistanceTest methodsFor: 'setup' stamp: 'PV 6/4/2017 10:12:08'!
 setUp
 
 	| factory |
-	
+
 	factory := DistanceFactory new.
-	
+
 	oneMeter :=  factory oneMeter.
 	anotherMeter := factory oneMeter.
 	twoMeters := factory twoMeters.
 	zeroMeters := factory zeroMeters.
-	oneHalfMeter := factory meters: 0.5.
+	oneHalfMeter := factory meters: 1/2.
 	threeMeters := factory meters: 3.
 
 	oneHundredCentimeters := factory oneHundredCentimeters.
 	zeroCentimeters := factory centimeters: 0.
 	ninetyCentimeters := factory centimeters: 90.
 	fiveCentimeters := factory centimeters: 5.
-	
-	oneThousandMilimeters := factory milimeters: 1000.
-	oneHundredMilimeters := factory milimeters: 100.
-	zeroMilimeters := factory milimeters: 0.
-	twoHundredMilimeters := factory milimeters: 200.
-	
+
+	oneThousandMillimeters := factory millimeters: 1000.
+	oneHundredMillimeters := factory millimeters: 100.
+	zeroMillimeters := factory millimeters: 0.
+	twoHundredMillimeters := factory millimeters: 200.
+	fiftyMilimiters := factory millimeters: 50.
+
 	tenKilometers := factory kilometers: 10.! !
 
 
@@ -928,36 +911,36 @@ test03OneMeterEqualsOneHundredCentimeters
 	
 	! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/26/2017 04:25:31'!
-test04OneHundredCentimetersEqualsOneThousandMilimeters
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 08:27:26'!
+test04OneHundredCentimetersEqualsOneThousandMillimeters
 
-	self assert: oneHundredCentimeters equals: oneThousandMilimeters! !
+	self assert: oneHundredCentimeters equals: oneThousandMillimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 14:28:25'!
-test05TwoMetersMinusOneHundredCentimetersEqualsOneThousandMilimeters
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 08:27:49'!
+test05TwoMetersMinusOneHundredCentimetersEqualsOneThousandMillimeters
 	"dosMetros - cienCentimetros = milMilimetros"
 
-	self assert: twoMeters - oneHundredCentimeters equals: oneThousandMilimeters! !
+	self assert: twoMeters - oneHundredCentimeters equals: oneThousandMillimeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:42:07'!
-test06OneThousandMilimetersEqualsOneHoundredCentimeters
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 08:28:02'!
+test06OneThousandMillimetersEqualsOneHoundredCentimeters
 
-	self assert: oneThousandMilimeters equals: oneHundredCentimeters ! !
+	self assert: oneThousandMillimeters equals: oneHundredCentimeters ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:42:23'!
-test07OneMeterMinusOneMeterEqualsZeroMilimeters
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 08:28:20'!
+test07OneMeterMinusOneMeterEqualsZeroMillimeters
 
-	self assert: oneMeter - oneMeter equals: zeroMilimeters ! !
+	self assert: oneMeter - oneMeter equals: zeroMillimeters ! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:42:44'!
 test08OneMeterPlusOneHundrerCentimeterEqualsTwoMeters
 
 	self assert: oneMeter + oneHundredCentimeters equals: twoMeters! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:43:15'!
-test09OneHoundredMilimetersPlusOneHundredMilimetersEqualsTwoHundrerMilimeters
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 08:30:44'!
+test09OneHoundredMillimetersPlusOneHundredMillimetersEqualsTwoHundrerMillimeters
 
-	self assert: oneHundredMilimeters + oneHundredMilimeters equals: twoHundredMilimeters! !
+	self assert: oneHundredMillimeters + oneHundredMillimeters equals: twoHundredMillimeters! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:43:37'!
 test10ProductWithNumbersAreCorrect
@@ -993,7 +976,7 @@ test13IntervalIsCorrect
 
 	self assert: ((oneMeter to: threeMeters) as: Array) equals: {oneMeter. twoMeters. threeMeters}! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:44:52'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 09:28:26'!
 test14IntervalWithByIsCorrect
 	"unMetro to: diezKilometros by: cincoCentimetros <-- representa un intervalo que va de un metro a diez kilometors cada cinco centimetros"
 
@@ -1001,38 +984,38 @@ test14IntervalWithByIsCorrect
 
 	aDistanceInterval := oneMeter to: tenKilometers by: fiveCentimeters.
 	
-	self assert: aDistanceInterval first equals: oneMeter.
+	self assert: (aDistanceInterval at:1) equals: oneMeter.
 	self assert: (aDistanceInterval at: 2) equals: oneMeter + fiveCentimeters.
 	self assert: (aDistanceInterval at: 3) equals: oneMeter + (2 * fiveCentimeters).
-	self assert: aDistanceInterval last equals: tenKilometers.
+	self assert: (aDistanceInterval at: aDistanceInterval size) equals: tenKilometers.
 	
 	self assert: aDistanceInterval size equals:
 		(self equivalentIntervalFromStart: oneMeter stop: tenKilometers step: fiveCentimeters) size.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'NC 5/30/2017 18:45:00'!
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 10:07:36'!
 test15IntervalIterationWorks
 	"unMetro to: diezKilometros by: cincoCentimetros do:[...] <-- permite recorrer el intervalo"
 
-	| count | 
+	| count distanceInterval | 
 
 	count := 0.
 	
-	oneMeter to: tenKilometers by: fiveCentimeters do: [ :aDistance | count := count + 1].
-	
+	oneMeter to: tenKilometers by: fiveCentimeters do: [ :aDistance | count := count + 1].	
 	self assert: count equals:
-		(self equivalentIntervalFromStart: oneMeter stop: tenKilometers step: fiveCentimeters) size.! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'PV 5/30/2017 16:50:22'!
-test16DistanceIntervalBehavesLikeAnInterval
-
-	| aDistanceInterval plusOneMeter minusOneMeter |
+		(self equivalentIntervalFromStart: oneMeter stop: tenKilometers step: fiveCentimeters) size.
 	
-	aDistanceInterval := oneMeter to: tenKilometers by: fiveCentimeters.
-	plusOneMeter := oneMeter + oneMeter to: tenKilometers + oneMeter by: fiveCentimeters.
-	minusOneMeter := oneMeter - oneMeter to: tenKilometers - oneMeter by: fiveCentimeters.
+	distanceInterval := zeroMeters to: oneMeter by: fiveCentimeters.
+	distanceInterval do: [ :aDistance | distanceInterval includes: aDistance ].! !
 
-	self assert: aDistanceInterval + oneMeter equals: plusOneMeter.
-	self assert: aDistanceInterval - oneMeter equals: minusOneMeter.! !
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 10:15:26'!
+test16TwoIntervalsWithSameIntervalAndDifferentDefinitionAreEqual
+
+	self assert: (zeroMeters to: oneMeter by: fiveCentimeters) equals: (zeroMeters to: oneHundredCentimeters by: fiftyMilimiters)! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'PV 6/4/2017 10:17:56'!
+test17TwoEqualIntervalHaveEqualHash
+
+	self assert: (zeroMeters to: oneMeter by: fiveCentimeters) hash equals: (zeroMeters to: oneHundredCentimeters by: fiftyMilimiters) hash! !
 
 
 !DistanceTest methodsFor: 'private' stamp: 'NC 6/1/2017 23:06:58'!
@@ -1050,25 +1033,25 @@ Object subclass: #DistanceFactory
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!DistanceFactory methodsFor: 'distance creation' stamp: 'NC 6/1/2017 23:27:15'!
-centimeters: aMagnitude
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:17'!
+centimeters: anAmount
 
-	^ Distance amount: aMagnitude unit: (DistanceUnit withName: 'centimeter' andDistanceInMeters: 1/100)! !
+	^ Distance amount: anAmount unit: DistanceUnit centimeter! !
 
-!DistanceFactory methodsFor: 'distance creation' stamp: 'NC 6/1/2017 23:27:18'!
-kilometers: aMagnitude
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:09'!
+kilometers: anAmount
 
-	^ Distance amount: aMagnitude unit: (DistanceUnit withName: 'kilometer' andDistanceInMeters: 1000)! !
+	^ Distance amount: anAmount unit: DistanceUnit kilometer! !
 
-!DistanceFactory methodsFor: 'distance creation' stamp: 'NC 6/1/2017 23:27:20'!
-meters: aMagnitude
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:01'!
+meters: anAmount
 
-	^ Distance amount: aMagnitude unit: (DistanceUnit withName: 'meter' andDistanceInMeters: 1)! !
+	^ Distance amount: anAmount unit: DistanceUnit meter! !
 
-!DistanceFactory methodsFor: 'distance creation' stamp: 'NC 6/1/2017 23:27:22'!
-milimeters: aMagnitude
+!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:28'!
+millimeters: anAmount
 
-	^ Distance amount: aMagnitude unit: (DistanceUnit withName: 'milimeter' andDistanceInMeters: 1/1000)! !
+	^ Distance amount: anAmount unit: DistanceUnit millimeter! !
 
 !DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:55:56'!
 minusOneMeter
@@ -1142,12 +1125,43 @@ printString
 DistanceUnit class
 	instanceVariableNames: ''!
 
-!DistanceUnit class methodsFor: 'as yet unclassified' stamp: 'PV 5/28/2017 11:51:38'!
-distanceInMeters
-
-	self subclassResponsibility! !
-
-!DistanceUnit class methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 20:40:52'!
+!DistanceUnit class methodsFor: 'initialization' stamp: 'NC 6/1/2017 20:40:52'!
 withName: aName andDistanceInMeters: aNumber 
 
 	^ self new initializeWithName: aName andDistanceInMeters: aNumber! !
+
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:59:03'!
+centimeter
+
+	^ DistanceUnit withName: 'centimeter' andDistanceInMeters: 1/100! !
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:58:48'!
+decameter
+	
+	^ DistanceUnit withName: 'decameter' andDistanceInMeters: 10! !
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:58:28'!
+decimeter
+	
+	^ DistanceUnit withName: 'decimeter' andDistanceInMeters: 1/10! !
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:57:56'!
+hectometer
+	
+	^ DistanceUnit withName: 'hectometer' andDistanceInMeters: 100! !
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:57:15'!
+kilometer
+	
+	^ DistanceUnit withName: 'kilometer' andDistanceInMeters: 1000! !
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:53:36'!
+meter
+	
+	^ DistanceUnit withName: 'meter' andDistanceInMeters: 1! !
+
+!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:53:34'!
+millimeter
+
+	^ (DistanceUnit withName: 'millimeter' andDistanceInMeters: 1/1000)! !
