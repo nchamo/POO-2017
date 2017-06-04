@@ -739,57 +739,6 @@ test32DistanceIntervalCanBeEnumeratedWithSpecificStep
 ! !
 
 
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:59:11'!
-centimeter
-
-	^ DistanceUnit centimeter! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:56'!
-decameter
-	
-	^ DistanceUnit decameter! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:35'!
-decimeter
-	
-	^ DistanceUnit decimeter! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'HAW 5/31/2017 12:37:50'!
-distanceUnits 
-
-	"¿Quién se anima a explicar cómo funciona este método? 
-	¿Por qué está hecho así? "
-		
-	| unitsCategory unitMessageNames |
-	
-	unitsCategory := self class organization categoryOfElement: thisContext method selector.
-	unitMessageNames := (self class organization listAtCategoryNamed:  unitsCategory) reject: [ :aMessageName | aMessageName = thisContext method selector ].
-	
-	 ^ unitMessageNames collect: [ :aMessageName | self perform: aMessageName ]
-	
-! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:08'!
-hectometer
-	
-	^ DistanceUnit hectometer! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:57:27'!
-kilometer
-	
-	^ DistanceUnit kilometer! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:55:15'!
-meter
-	
-	^ DistanceUnit meter! !
-
-!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:52:54'!
-millimeter
-	
-	^ DistanceUnit millimeter! !
-
-
 !CatedraDistanceTest methodsFor: 'distance measures' stamp: 'HAW 5/31/2017 11:20:12'!
 distanceExamples
 
@@ -839,6 +788,57 @@ twoMeters
 zeroMeters
 
 	^factory zeroMeters ! !
+
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:59:11'!
+centimeter
+
+	^ DistanceUnit centimeter! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:56'!
+decameter
+	
+	^ DistanceUnit decameter! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:35'!
+decimeter
+	
+	^ DistanceUnit decimeter! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'HAW 5/31/2017 12:37:50'!
+distanceUnits 
+
+	"¿Quién se anima a explicar cómo funciona este método? 
+	¿Por qué está hecho así? "
+		
+	| unitsCategory unitMessageNames |
+	
+	unitsCategory := self class organization categoryOfElement: thisContext method selector.
+	unitMessageNames := (self class organization listAtCategoryNamed:  unitsCategory) reject: [ :aMessageName | aMessageName = thisContext method selector ].
+	
+	 ^ unitMessageNames collect: [ :aMessageName | self perform: aMessageName ]
+	
+! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:58:08'!
+hectometer
+	
+	^ DistanceUnit hectometer! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:57:27'!
+kilometer
+	
+	^ DistanceUnit kilometer! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:55:15'!
+meter
+	
+	^ DistanceUnit meter! !
+
+!CatedraDistanceTest methodsFor: 'distance units' stamp: 'PV 6/4/2017 07:52:54'!
+millimeter
+	
+	^ DistanceUnit millimeter! !
 
 
 !CatedraDistanceTest methodsFor: 'setup' stamp: 'NC 6/1/2017 22:57:28'!
@@ -1026,6 +1026,19 @@ equivalentIntervalFromStart: startDistance stop: stopDistance step: stepDistance
 		by: stepDistance amount! !
 
 
+!classDefinition: #MeasureTest category: #'Measure-Solution'!
+DistanceTest subclass: #MeasureTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+!MeasureTest methodsFor: '1 - Test equality' stamp: 'PV 6/4/2017 18:13:53'!
+test01ObjectsRepresentingSameMeasureShouldBeEqual
+
+	self assert: self oneMeter = self oneMeter.! !
+
+
 !classDefinition: #DistanceFactory category: #'Measure-Solution'!
 Object subclass: #DistanceFactory
 	instanceVariableNames: ''
@@ -1165,3 +1178,84 @@ meter
 millimeter
 
 	^ (DistanceUnit withName: 'millimeter' andDistanceInMeters: 1/1000)! !
+
+
+!classDefinition: #MeasureFactory category: #'Measure-Solution'!
+Object subclass: #MeasureFactory
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:26:00'!
+centimeter
+
+	^ DistanceUnit centimeter! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:26:34'!
+decameter
+
+	^ DistanceUnit decameter! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:26:58'!
+decimeter
+
+	^ DistanceUnit decimeter! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:27:11'!
+hectometer
+
+	^ DistanceUnit hectometer! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:27:23'!
+kilometer
+
+	^ DistanceUnit kilometer! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:27:36'!
+meter
+
+	^ DistanceUnit meter! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'PV 6/4/2017 11:27:47'!
+millimeter
+
+	^ DistanceUnit millimeter! !
+
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:35:09'!
+minusOneMeter
+
+	^ DistanceFactory new minusOneMeter! !
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:37:24'!
+oneCentimeter
+
+	^ DistanceFactory new oneCentimeter! !
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:37:40'!
+oneHundredCentimeters
+
+	^ DistanceFactory new oneHundredCentimeters! !
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:37:49'!
+oneMeter
+
+	^ DistanceFactory new oneMeter! !
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:38:00'!
+twoHundredCentimeters
+
+	^ DistanceFactory new twoHundredCentimeters! !
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:38:16'!
+twoMeters
+
+	^ DistanceFactory new twoMeters! !
+
+!MeasureFactory methodsFor: 'distance measures' stamp: 'PV 6/4/2017 11:38:30'!
+zeroMeters
+
+	^ DistanceFactory new zeroMeters! !
+
+
