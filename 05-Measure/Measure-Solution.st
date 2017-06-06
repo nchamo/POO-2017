@@ -1,144 +1,3 @@
-!classDefinition: #Distance category: #'Measure-Solution'!
-Magnitude subclass: #Distance
-	instanceVariableNames: 'amount unit'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Measure-Solution'!
-
-!Distance methodsFor: 'accessing' stamp: 'NC 6/1/2017 23:24:04'!
-amount
-	
-	^ amount! !
-
-!Distance methodsFor: 'accessing' stamp: 'NC 5/28/2017 17:17:35'!
-unit
-	
-	^ unit! !
-
-
-!Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:26:16'!
-* aMultiplier
-
-	^ self class amount: amount * aMultiplier unit: unit! !
-
-!Distance methodsFor: 'arithmetic' stamp: 'PV 6/4/2017 08:20:03'!
-+ aDistance
-
-	^ self class amount: self distanceInMeters + aDistance distanceInMeters unit: DistanceUnit meter! !
-
-!Distance methodsFor: 'arithmetic' stamp: 'PV 6/4/2017 08:20:18'!
-- aDistance
-
-	^ self class amount: self distanceInMeters - aDistance distanceInMeters unit: DistanceUnit meter! !
-
-!Distance methodsFor: 'arithmetic' stamp: 'PV 6/4/2017 08:45:02'!
-/ aDividerNumber
-
-	^ self class amount: amount / aDividerNumber unit: unit! !
-
-!Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:26:43'!
-adaptToNumber: aMultiplier andSend: anOperationSymbol
-
-	anOperationSymbol = #* ifFalse: [
-		self error: 'Distance only knows how to adapt to a number when the operation is the multiplication' ].
-
-	^ self class amount: amount * aMultiplier unit: unit.! !
-
-!Distance methodsFor: 'arithmetic' stamp: 'NC 6/1/2017 23:27:04'!
-negated
-	
-	^ self class amount: amount negated unit: unit. ! !
-
-
-!Distance methodsFor: 'comparing' stamp: 'PV 5/28/2017 12:19:56'!
-< aDistance
-
-	^ self compare: aDistance with: #<! !
-
-!Distance methodsFor: 'comparing' stamp: 'NC 6/1/2017 19:35:33'!
-= aDistance
-
-	(aDistance isKindOf: Distance) ifFalse: [ ^ false ].   
-
-	^ self compare: aDistance with: #=! !
-
-!Distance methodsFor: 'comparing' stamp: 'NC 6/1/2017 20:15:56'!
-hash
-	
-	^ self distanceInMeters hash! !
-
-
-!Distance methodsFor: 'converting' stamp: 'NC 6/1/2017 23:26:52'!
-convertTo: aUnit
-	
-	^ self class amount: (self distanceIn: aUnit) unit: aUnit.! !
-
-!Distance methodsFor: 'converting' stamp: 'NC 6/1/2017 23:24:15'!
-distanceIn: aDistanceUnit
-
-	^ amount * unit distanceInMeters / aDistanceUnit distanceInMeters! !
-
-!Distance methodsFor: 'converting' stamp: 'PV 6/4/2017 08:21:06'!
-distanceInMeters
-
-	^ self distanceIn: DistanceUnit meter! !
-
-
-!Distance methodsFor: 'initialization' stamp: 'NC 6/1/2017 23:29:25'!
-initializeWithAmount: anAmount andUnit: aUnit
-
-	amount := anAmount.
-	unit := aUnit.
-	! !
-
-
-!Distance methodsFor: 'printing' stamp: 'PV 6/4/2017 10:00:34'!
-printString
-	
-	| string |
-
-	string := amount printString , ' ' , unit printString.
-	
-	amount = 1 ifFalse: [ string := string, 's' ].
-	
-	^ string.! !
-
-
-!Distance methodsFor: 'stepping' stamp: 'PV 5/28/2017 12:56:27'!
-to: aDistance 
-
-	^ DistanceInterval from: self to: aDistance ! !
-
-!Distance methodsFor: 'stepping' stamp: 'NC 5/28/2017 18:02:13'!
-to: aDistance by: anotherDistance
-
-	^ DistanceInterval from: self to: aDistance by: anotherDistance! !
-
-!Distance methodsFor: 'stepping' stamp: 'NC 6/1/2017 23:19:26'!
-to: aDistance by: anotherDistance do: aBlock
-		
-	(self to: aDistance by: anotherDistance) do: aBlock
-	! !
-
-
-
-!Distance methodsFor: 'private' stamp: 'PV 5/28/2017 12:19:37'!
-compare: aDistance with: anOperatorSymbol
-
-	^ self distanceInMeters perform: anOperatorSymbol with: aDistance distanceInMeters! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Distance class' category: #'Measure-Solution'!
-Distance class
-	instanceVariableNames: ''!
-
-!Distance class methodsFor: 'initialization' stamp: 'NC 6/1/2017 23:29:36'!
-amount: anAmount unit: aUnit
-	
-	^ self new initializeWithAmount: anAmount andUnit: aUnit! !
-
-
 !classDefinition: #Measure category: #'Measure-Solution'!
 Magnitude subclass: #Measure
 	instanceVariableNames: 'amount unit'
@@ -224,8 +83,10 @@ amountInBase
 
 	^ self amountIn: unit baseUnit ! !
 
-!Measure methodsFor: 'converting' stamp: 'NC 6/4/2017 21:04:16'!
+!Measure methodsFor: 'converting' stamp: 'NC 6/5/2017 20:37:37'!
 convertTo: aUnit
+	
+	self unit baseUnit = aUnit baseUnit ifFalse: [ self error: self class wrongTypeConversionErrorMessageDescription ].
 	
 	^ self class amount: (self amountIn: aUnit) unit: aUnit.! !
 
@@ -267,10 +128,12 @@ to: aMeasure by: anotherMeasure do: aBlock
 	! !
 
 
-!Measure methodsFor: 'private' stamp: 'PV 6/5/2017 18:06:41'!
+!Measure methodsFor: 'private' stamp: 'NC 6/5/2017 21:13:20'!
 compare: aMeasure with: anOperatorSymbol
 
-	^ self unit baseUnit = aMeasure unit baseUnit and: [ self amountInBase perform: anOperatorSymbol with: aMeasure amountInBase ]! !
+	^ self unit baseUnit = aMeasure unit baseUnit 
+		ifTrue: [ ^ self amountInBase perform: anOperatorSymbol with: aMeasure amountInBase ]
+		ifFalse: [ ^ self amountInBase isZero and: [ aMeasure amountInBase isZero] ]! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -282,6 +145,12 @@ Measure class
 amount: anAmount unit: aUnit
 	
 	^ self new initializeWithAmount: anAmount andUnit: aUnit! !
+
+
+!Measure class methodsFor: 'error description' stamp: 'NC 6/5/2017 20:34:07'!
+wrongTypeConversionErrorMessageDescription
+	
+	^ 'Cant convert a measure to a unit of a different type'! !
 
 
 !classDefinition: #DistanceInterval category: #'Measure-Solution'!
@@ -1172,7 +1041,7 @@ equivalentIntervalFromStart: startDistance stop: stopDistance step: stepDistance
 
 
 !classDefinition: #MeasureTest category: #'Measure-Solution'!
-DistanceTest subclass: #MeasureTest
+TestCase subclass: #MeasureTest
 	instanceVariableNames: 'factory'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -1185,17 +1054,39 @@ test01ObjectsRepresentingSameMeasureShouldBeEqual
 	
 	self assert: factory oneMeter equals: factory oneHundredCentimeters.! !
 
-!MeasureTest methodsFor: '1 - Test equality' stamp: 'PV 6/5/2017 17:51:55'!
-test02DiferentMeasuresShouldNotBeEqual
+!MeasureTest methodsFor: '1 - Test equality' stamp: 'NC 6/5/2017 20:44:27'!
+test02DifferentMeasuresShouldNotBeEqual
 
 	self deny: factory oneMeter = factory twoMeters.
-	self deny: factory twoMeters = factory oneMeter.
+	self deny: factory twoMeters = factory oneMeter.! !
+
+!MeasureTest methodsFor: '1 - Test equality' stamp: 'NC 6/5/2017 20:44:30'!
+test03MeasuresOfDifferentTypesShouldNotBeEqual
 	
+	"10 pesos = 20 dollares --> da falso, no error
+	10 kilos = 20 litros --> da falso, no error"
+	
+	self deny: factory tenKilometers = factory thirtyLiters.
 	self deny: factory fiftyDolars = factory fiftyPesos.! !
 
+!MeasureTest methodsFor: '1 - Test equality' stamp: 'NC 6/5/2017 20:58:23'!
+test04MeasuresOfTheSameTypeAreEqualWhenAmountIsZero
+	
+	self assert: factory zeroMeters = factory zeroMillimeters.
+	self assert: factory zeroKilograms = factory zeroGrams.! !
 
-!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'PV 6/5/2017 17:48:22'!
-test02CanAddMeasuresOfTheSameType
+!MeasureTest methodsFor: '1 - Test equality' stamp: 'NC 6/5/2017 21:08:36'!
+test05MeasuresOfTheDifferentTypeAreEqualWhenAmountIsZero
+	
+	"0 metros = 0 pesos
+	0 pesos = 0 litros"
+	
+	self assert: factory zeroMeters equals: factory zeroPesos.
+	self assert: factory zeroPesos equals: factory zeroLiters.! !
+
+
+!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'NC 6/5/2017 20:21:53'!
+test03CanAddMeasuresOfTheSameType
 
 	"1 kilogramo + 100 gramos"
 	"10 pesos - 5 centavos de peso"
@@ -1208,22 +1099,22 @@ test02CanAddMeasuresOfTheSameType
 	self assert: factory oneKilogram + factory oneHundredGrams equals: oneKilogramAndOneHundredGrams.
 	self assert: factory tenPesos - factory fivePesoCents equals: ninePesosAndNinetyFivePesoCents.! !
 
-!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'PV 6/5/2017 17:17:10'!
-test03CanMultiplyMeasuresByANumber
+!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'NC 6/5/2017 20:22:00'!
+test04CanMultiplyMeasuresByANumber
 
 	"50 dolares * 10"
 
 	self assert: (Measure amount: 50 unit: Unit dolar) * 10 equals: (Measure amount: 500 unit: Unit dolar).! !
 
-!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'PV 6/5/2017 17:34:47'!
-test04CanDivideMeasuresByANumber
+!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'NC 6/5/2017 20:22:11'!
+test05CanDivideMeasuresByANumber
 
 	"30 litros / 10"
 
 	self assert: factory thirtyLiters / 10 equals: factory threeLiters! !
 
-!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'PV 6/5/2017 18:17:37'!
-test05CanAddMeasuresOfDifferentUnit
+!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'NC 6/5/2017 20:36:51'!
+test06CanAddMeasuresOfDifferentUnit
 
 	"10 pesos + 50 dolares = 50 dolares + 10 pesos"
 
@@ -1231,154 +1122,65 @@ test05CanAddMeasuresOfDifferentUnit
 	
 	"1 kilogramo + 30 litros = 30 litros + 1 kilogramo"
 	
-	self assert: factory oneKilogram + factory thirtyLiters equals: factory threeLiters + factory oneKilogram.! !
+	self assert: factory oneKilogram + factory thirtyLiters equals: factory thirtyLiters + factory oneKilogram.! !
+
+!MeasureTest methodsFor: '2 - Test arithmetic operations' stamp: 'NC 6/5/2017 21:29:22'!
+test07CanCreateAMeasureByMultipliyingANumberAndUnit
+
+	| | 
+
+	"10*metro --> devuelve una medida que representa 10 metros"
+	
+	self assert: 10 * factory meter equals: factory tenMeters.
+	
+	"5*kilogramo -> devuelve 5 kilogramos"
+
+	self assert: 5 * factory kilogram equals: factory fiveKilograms.! !
+
+
+!MeasureTest methodsFor: '3 - Test converting' stamp: 'NC 6/5/2017 20:29:19'!
+test08CanConvertAUnitToAnotherOfTheSameType
+
+	"unkilogramo convertTo: gramo"
+	
+	| convertedKilogram |
+	
+	convertedKilogram := factory oneKilogram convertTo: Unit gram.
+
+	self assert: convertedKilogram unit equals: Unit gram.
+	self assert: convertedKilogram amount equals: 1000.! !
+
+!MeasureTest methodsFor: '3 - Test converting' stamp: 'NC 6/5/2017 20:32:55'!
+test09CantConvertAUnitToAnotherOfDifferentType
+
+	"diezPesos convertoTo: metro --> error"
+	
+	self should: [ factory tenPesos convertTo: Unit meter. ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText equals: Measure wrongTypeConversionErrorMessageDescription ]
+	
+	! !
+
+
+!MeasureTest methodsFor: '4 - Test compound' stamp: 'NC 6/5/2017 23:23:52'!
+test10CanCreateCompoundMeasures
+
+	| speedMeasure  |
+
+	"10 metros/segundo (velocidad)"
+	
+	speedMeasure := 10 * (factory meter / factory second).
+	
+	self assert: speedMeasure amount equals: 10.
+	self assert: speedMeasure printString equals: '10 meter / second'.
+	! !
 
 
 !MeasureTest methodsFor: 'setup' stamp: 'NC 6/4/2017 21:26:46'!
 setUp
 	
 	factory := MeasureFactory new.! !
-
-
-!classDefinition: #DistanceFactory category: #'Measure-Solution'!
-Object subclass: #DistanceFactory
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Measure-Solution'!
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:17'!
-centimeters: anAmount
-
-	^ Distance amount: anAmount unit: DistanceUnit centimeter! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:09'!
-kilometers: anAmount
-
-	^ Distance amount: anAmount unit: DistanceUnit kilometer! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:01'!
-meters: anAmount
-
-	^ Distance amount: anAmount unit: DistanceUnit meter! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 6/4/2017 08:18:28'!
-millimeters: anAmount
-
-	^ Distance amount: anAmount unit: DistanceUnit millimeter! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:55:56'!
-minusOneMeter
-
-	^ self meters: -1! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:56:21'!
-oneCentimeter
-
-	^ self centimeters: 1! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:58:53'!
-oneHundredCentimeters
-
-	^ self centimeters: 100! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:58:34'!
-oneMeter
-
-	^ self meters: 1! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:59:10'!
-twoHundredCentimeters
-
-	^ self centimeters: 200! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:59:23'!
-twoMeters
-
-	^ self meters: 2! !
-
-!DistanceFactory methodsFor: 'distance creation' stamp: 'PV 5/30/2017 14:59:37'!
-zeroMeters
-
-	^ self meters: 0! !
-
-
-!classDefinition: #DistanceUnit category: #'Measure-Solution'!
-Object subclass: #DistanceUnit
-	instanceVariableNames: 'name distanceInMeters'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Measure-Solution'!
-
-!DistanceUnit methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 20:48:02'!
-= anObject
-	
-	(anObject isKindOf: self class) ifFalse: [ ^ false ].
-	
-	^ name = anObject name and: [ distanceInMeters = anObject distanceInMeters ]! !
-
-!DistanceUnit methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 20:38:35'!
-distanceInMeters
-	
-	^ distanceInMeters! !
-
-!DistanceUnit methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 20:41:23'!
-initializeWithName: aName andDistanceInMeters: aNumber
-	
-	name := aName.
-	distanceInMeters := aNumber.! !
-
-!DistanceUnit methodsFor: 'as yet unclassified' stamp: 'NC 6/1/2017 20:49:03'!
-printString
-
-	^ name! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'DistanceUnit class' category: #'Measure-Solution'!
-DistanceUnit class
-	instanceVariableNames: ''!
-
-!DistanceUnit class methodsFor: 'initialization' stamp: 'NC 6/1/2017 20:40:52'!
-withName: aName andDistanceInMeters: aNumber 
-
-	^ self new initializeWithName: aName andDistanceInMeters: aNumber! !
-
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:59:03'!
-centimeter
-
-	^ DistanceUnit withName: 'centimeter' andDistanceInMeters: 1/100! !
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:58:48'!
-decameter
-	
-	^ DistanceUnit withName: 'decameter' andDistanceInMeters: 10! !
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:58:28'!
-decimeter
-	
-	^ DistanceUnit withName: 'decimeter' andDistanceInMeters: 1/10! !
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:57:56'!
-hectometer
-	
-	^ DistanceUnit withName: 'hectometer' andDistanceInMeters: 100! !
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:57:15'!
-kilometer
-	
-	^ DistanceUnit withName: 'kilometer' andDistanceInMeters: 1000! !
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:53:36'!
-meter
-	
-	^ DistanceUnit withName: 'meter' andDistanceInMeters: 1! !
-
-!DistanceUnit class methodsFor: 'accessing instances and variables' stamp: 'PV 6/4/2017 07:53:34'!
-millimeter
-
-	^ (DistanceUnit withName: 'millimeter' andDistanceInMeters: 1/1000)! !
 
 
 !classDefinition: #MeasureFactory category: #'Measure-Solution'!
@@ -1388,40 +1190,30 @@ Object subclass: #MeasureFactory
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:18'!
-centimeter
+!MeasureFactory methodsFor: 'currency measures' stamp: 'PV 6/5/2017 17:36:38'!
+fiftyDolars
 
-	^ Unit centimeter ! !
+	^ Measure amount: 50 unit: Unit dolar ! !
 
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:43'!
-decameter
+!MeasureFactory methodsFor: 'currency measures' stamp: 'PV 6/5/2017 17:55:32'!
+fiftyPesos
 
-	^ Unit decameter ! !
+	^ Measure amount: 50 unit: Unit peso ! !
 
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:49'!
-decimeter
+!MeasureFactory methodsFor: 'currency measures' stamp: 'NC 6/4/2017 23:07:44'!
+fivePesoCents
+	
+	^ Measure amount: 5 unit: Unit pesoCent! !
 
-	^ Unit decimeter ! !
+!MeasureFactory methodsFor: 'currency measures' stamp: 'NC 6/4/2017 23:05:55'!
+tenPesos
+	
+	^ Measure amount: 10 unit: Unit peso! !
 
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:54'!
-hectometer
-
-	^ Unit hectometer ! !
-
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:00'!
-kilometer
-
-	^ Unit kilometer ! !
-
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:05'!
-meter
-
-	^ Unit meter ! !
-
-!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:10'!
-millimeter
-
-	^ Unit millimeter ! !
+!MeasureFactory methodsFor: 'currency measures' stamp: 'NC 6/5/2017 20:57:24'!
+zeroPesos
+	
+	^ Measure amount: 0 unit: Unit peso! !
 
 
 !MeasureFactory methodsFor: 'distance measures' stamp: 'NC 6/4/2017 21:22:04'!
@@ -1479,6 +1271,11 @@ tenKilometers
 
 	^ self kilometers: 10! !
 
+!MeasureFactory methodsFor: 'distance measures' stamp: 'NC 6/5/2017 21:30:20'!
+tenMeters
+
+	^ self meters: 10! !
+
 !MeasureFactory methodsFor: 'distance measures' stamp: 'NC 6/4/2017 21:20:00'!
 threeMeters
 
@@ -1515,7 +1312,68 @@ zeroMillimeters
 	^ self millimeters: 0! !
 
 
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:18'!
+centimeter
 
+	^ Unit centimeter ! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:43'!
+decameter
+
+	^ Unit decameter ! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:49'!
+decimeter
+
+	^ Unit decimeter ! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:31:54'!
+hectometer
+
+	^ Unit hectometer ! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:00'!
+kilometer
+
+	^ Unit kilometer ! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:05'!
+meter
+
+	^ Unit meter ! !
+
+!MeasureFactory methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:10'!
+millimeter
+
+	^ Unit millimeter ! !
+
+
+!MeasureFactory methodsFor: 'time units' stamp: 'NC 6/5/2017 22:05:00'!
+second
+
+	^ Unit second ! !
+
+
+!MeasureFactory methodsFor: 'volume measures' stamp: 'PV 6/5/2017 17:33:36'!
+thirtyLiters
+
+	^ Measure amount: 30 unit: Unit liter! !
+
+!MeasureFactory methodsFor: 'volume measures' stamp: 'PV 6/5/2017 17:34:13'!
+threeLiters
+
+	^ Measure amount: 3 unit: Unit liter! !
+
+!MeasureFactory methodsFor: 'volume measures' stamp: 'NC 6/5/2017 20:57:34'!
+zeroLiters
+
+	^ Measure amount: 0 unit: Unit liter! !
+
+
+!MeasureFactory methodsFor: 'weight measures' stamp: 'NC 6/5/2017 21:29:35'!
+fiveKilograms
+	
+	^ Measure amount: 5 unit: Unit kilogram! !
 
 !MeasureFactory methodsFor: 'weight measures' stamp: 'NC 6/4/2017 21:28:31'!
 oneHundredGrams
@@ -1526,6 +1384,22 @@ oneHundredGrams
 oneKilogram
 	
 	^ Measure amount: 1 unit: Unit kilogram! !
+
+!MeasureFactory methodsFor: 'weight measures' stamp: 'NC 6/5/2017 20:56:11'!
+zeroGrams
+	
+	^ Measure amount: 0 unit: Unit gram! !
+
+!MeasureFactory methodsFor: 'weight measures' stamp: 'NC 6/5/2017 20:56:04'!
+zeroKilograms
+	
+	^ Measure amount: 0 unit: Unit kilogram! !
+
+
+!MeasureFactory methodsFor: 'weight units' stamp: 'NC 6/5/2017 21:30:48'!
+kilogram
+
+	^ Unit kilogram ! !
 
 
 !MeasureFactory methodsFor: 'private' stamp: 'NC 6/4/2017 21:06:17'!
@@ -1548,38 +1422,6 @@ millimeters: anAmount
 
 	^ Measure amount: anAmount unit: Unit millimeter! !
 
-
-!MeasureFactory methodsFor: 'currency measures' stamp: 'PV 6/5/2017 17:36:38'!
-fiftyDolars
-
-	^ Measure amount: 50 unit: Unit dolar ! !
-
-!MeasureFactory methodsFor: 'currency measures' stamp: 'PV 6/5/2017 17:55:32'!
-fiftyPesos
-
-	^ Measure amount: 50 unit: Unit peso ! !
-
-!MeasureFactory methodsFor: 'currency measures' stamp: 'NC 6/4/2017 23:07:44'!
-fivePesoCents
-	
-	^ Measure amount: 5 unit: Unit pesoCent! !
-
-!MeasureFactory methodsFor: 'currency measures' stamp: 'NC 6/4/2017 23:05:55'!
-tenPesos
-	
-	^ Measure amount: 10 unit: Unit peso! !
-
-
-!MeasureFactory methodsFor: 'volume' stamp: 'PV 6/5/2017 17:33:36'!
-thirtyLiters
-
-	^ Measure amount: 30 unit: Unit liter! !
-
-!MeasureFactory methodsFor: 'volume' stamp: 'PV 6/5/2017 17:34:13'!
-threeLiters
-
-	^ Measure amount: 3 unit: Unit liter! !
-
 
 !classDefinition: #Unit category: #'Measure-Solution'!
 Object subclass: #Unit
@@ -1597,6 +1439,20 @@ baseUnit
 ratioToBase
 	
 	self subclassResponsibility ! !
+
+
+!Unit methodsFor: 'arithmetic' stamp: 'NC 6/5/2017 23:16:42'!
+/ aUnit
+
+	self subclassResponsibility ! !
+
+!Unit methodsFor: 'arithmetic' stamp: 'NC 6/5/2017 21:25:08'!
+adaptToNumber: aMultiplier andSend: anOperationSymbol
+
+	anOperationSymbol = #* ifFalse: [
+		self error: 'Units only knows how to adapt to a number when the operation is the multiplication' ].
+
+	^ Measure amount: aMultiplier unit: self! !
 
 
 !Unit methodsFor: 'comparing' stamp: 'NC 6/4/2017 20:10:19'!
@@ -1626,6 +1482,29 @@ printString
 !classDefinition: 'Unit class' category: #'Measure-Solution'!
 Unit class
 	instanceVariableNames: ''!
+
+!Unit class methodsFor: 'dolar and derived' stamp: 'PV 6/5/2017 17:16:26'!
+dolar
+	
+	^ BaseUnit withName: 'dolar'! !
+
+
+!Unit class methodsFor: 'gram and derived' stamp: 'NC 6/4/2017 20:45:30'!
+gram
+	
+	^ BaseUnit withName: 'gram'! !
+
+!Unit class methodsFor: 'gram and derived' stamp: 'NC 6/4/2017 20:46:08'!
+kilogram
+	
+	^ DerivedUnit withName: 'kilogram' aBaseUnit: self gram andARatio: 1000! !
+
+
+!Unit class methodsFor: 'liter and derived' stamp: 'PV 6/5/2017 17:24:25'!
+liter
+	
+	^ BaseUnit withName: 'liter'! !
+
 
 !Unit class methodsFor: 'meter and derived' stamp: 'NC 6/4/2017 20:27:39'!
 centimeter
@@ -1663,17 +1542,6 @@ millimeter
 	^ DerivedUnit withName: 'millimeter' aBaseUnit: self meter andARatio: 1/1000! !
 
 
-!Unit class methodsFor: 'gram and derived' stamp: 'NC 6/4/2017 20:45:30'!
-gram
-	
-	^ BaseUnit withName: 'gram'! !
-
-!Unit class methodsFor: 'gram and derived' stamp: 'NC 6/4/2017 20:46:08'!
-kilogram
-	
-	^ DerivedUnit withName: 'kilogram' aBaseUnit: self gram andARatio: 1000! !
-
-
 !Unit class methodsFor: 'peso and derived' stamp: 'NC 6/4/2017 23:06:36'!
 peso
 	
@@ -1685,19 +1553,58 @@ pesoCent
 	^ DerivedUnit withName: 'peso cent' aBaseUnit: self peso andARatio: 1/100! !
 
 
-!Unit class methodsFor: 'as yet unclassified' stamp: 'PV 6/5/2017 17:16:26'!
-dolar
+!Unit class methodsFor: 'second and derived' stamp: 'NC 6/5/2017 22:05:28'!
+second
 	
-	^ BaseUnit withName: 'dolar'! !
+	^ BaseUnit withName: 'second'! !
 
-!Unit class methodsFor: 'as yet unclassified' stamp: 'PV 6/5/2017 17:24:25'!
-liter
+
+!classDefinition: #CompoundUnit category: #'Measure-Solution'!
+Unit subclass: #CompoundUnit
+	instanceVariableNames: 'dividend divisor'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+!CompoundUnit methodsFor: 'initialization' stamp: 'NC 6/5/2017 23:30:11'!
+initializeWithDividend: aUnit andDivisor: anotherUnit
 	
-	^ BaseUnit withName: 'liter'! !
+	dividend := aUnit.
+	divisor := anotherUnit.! !
+
+
+!CompoundUnit methodsFor: 'printing' stamp: 'NC 6/5/2017 23:31:55'!
+printString
+
+	^ dividend printString, ' / ', divisor printString ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CompoundUnit class' category: #'Measure-Solution'!
+CompoundUnit class
+	instanceVariableNames: ''!
+
+!CompoundUnit class methodsFor: 'instance creation' stamp: 'NC 6/5/2017 23:30:42'!
+withDividend: aUnit andDivisor: anotherUnit
+	
+	^ self new initializeWithDividend: aUnit andDivisor: anotherUnit! !
+
+
+!classDefinition: #SingleUnit category: #'Measure-Solution'!
+Unit subclass: #SingleUnit
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+!SingleUnit methodsFor: 'arithmetic' stamp: 'NC 6/5/2017 23:29:24'!
+/ aUnit
+
+	  ^ CompoundUnit withDividend: self andDivisor: aUnit! !
 
 
 !classDefinition: #BaseUnit category: #'Measure-Solution'!
-Unit subclass: #BaseUnit
+SingleUnit subclass: #BaseUnit
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -1739,7 +1646,7 @@ withName: aName
 
 
 !classDefinition: #DerivedUnit category: #'Measure-Solution'!
-Unit subclass: #DerivedUnit
+SingleUnit subclass: #DerivedUnit
 	instanceVariableNames: 'baseUnit ratioToBase'
 	classVariableNames: ''
 	poolDictionaries: ''
