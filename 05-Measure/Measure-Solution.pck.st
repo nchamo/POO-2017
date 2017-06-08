@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3086] on 8 June 2017 at 8:02:23 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3086] on 8 June 2017 at 5:34:35 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Measure-Solution' 1 0!
+!provides: 'Measure-Solution' 1 1!
 !classDefinition: #SingleMeasure category: #'Measure-Solution'!
 Magnitude subclass: #SingleMeasure
 	instanceVariableNames: 'amount unit'
@@ -11,14 +11,14 @@ Magnitude subclass: #SingleMeasure
 SingleMeasure class
 	instanceVariableNames: ''!
 
-!classDefinition: #DistanceInterval category: #'Measure-Solution'!
-Collection subclass: #DistanceInterval
+!classDefinition: #MeasureInterval category: #'Measure-Solution'!
+Collection subclass: #MeasureInterval
 	instanceVariableNames: 'interval unit'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
-!classDefinition: 'DistanceInterval class' category: #'Measure-Solution'!
-DistanceInterval class
+!classDefinition: 'MeasureInterval class' category: #'Measure-Solution'!
+MeasureInterval class
 	instanceVariableNames: ''!
 
 !classDefinition: #CatedraDistanceTest category: #'Measure-Solution'!
@@ -247,6 +247,11 @@ initializeWithAmount: anAmount andUnit: aUnit
 	unit := aUnit.
 	! !
 
+!SingleMeasure methodsFor: 'comparing' stamp: 'PV 6/8/2017 16:33:33'!
+isSameTypeAs: aMeasure
+	
+	^ unit isSameTypeAs: aMeasure unit! !
+
 !SingleMeasure methodsFor: 'arithmetic' stamp: 'NC 6/8/2017 06:17:07'!
 multiplyAMeasure: aMeasure
 	
@@ -266,15 +271,15 @@ printOn: aStream
 		ifFalse: [ aStream nextPutAll: unit printPlural ]
 		ifTrue: [ aStream nextPutAll: unit printString ].! !
 
-!SingleMeasure methodsFor: 'stepping' stamp: 'NC 6/4/2017 21:01:40'!
+!SingleMeasure methodsFor: 'stepping' stamp: 'PV 6/8/2017 16:29:46'!
 to: aMeasure 
 
-	^ DistanceInterval from: self to: aMeasure ! !
+	^ MeasureInterval from: self to: aMeasure ! !
 
-!SingleMeasure methodsFor: 'stepping' stamp: 'NC 6/4/2017 21:01:52'!
+!SingleMeasure methodsFor: 'stepping' stamp: 'PV 6/8/2017 16:35:59'!
 to: aMeasure by: anotherMeasure
 
-	^ DistanceInterval from: self to: aMeasure by: anotherMeasure! !
+	^ MeasureInterval from: self to: aMeasure by: anotherMeasure! !
 
 !SingleMeasure methodsFor: 'stepping' stamp: 'NC 6/4/2017 21:02:01'!
 to: aMeasure by: anotherMeasure do: aBlock
@@ -310,103 +315,110 @@ wrongTypeConversionErrorMessageDescription
 	
 	^ 'Cant convert a measure to a unit of a different type'! !
 
-!DistanceInterval methodsFor: 'comparing' stamp: 'PV 6/4/2017 10:13:20'!
-= aDistanceInterval
+!MeasureInterval methodsFor: 'comparing' stamp: 'PV 6/8/2017 16:22:51'!
+= aMeasureInterval
 
-	^ aDistanceInterval from = self from and: [aDistanceInterval to = self to] and: [aDistanceInterval by = self by]! !
+	^ aMeasureInterval from = self from and: [aMeasureInterval to = self to] and: [aMeasureInterval by = self by]! !
 
-!DistanceInterval methodsFor: 'adding' stamp: 'PV 6/4/2017 10:20:11'!
+!MeasureInterval methodsFor: 'adding' stamp: 'PV 6/8/2017 16:23:08'!
 add: newObject 
-	"Adding to a DistanceInterval is not allowed."
+	"Adding to a MeasureInterval is not allowed."
 
 	self shouldNotImplement! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/8/2017 00:12:52'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 at: aPosition
 
 	^ SingleMeasure amount: (interval at: aPosition) unit: unit.! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/1/2017 19:44:08'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 by
 	
 	^ (self at: 2) - (self at: 1)! !
 
-!DistanceInterval methodsFor: 'enumerating' stamp: 'NC 6/8/2017 00:12:48'!
+!MeasureInterval methodsFor: 'enumerating' stamp: 'PV 6/8/2017 16:01:42'!
 do: aBlock
 
 	interval do: [ :anAmount | aBlock value: (SingleMeasure amount: anAmount unit: unit) ]! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/8/2017 00:12:44'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 from
 	
 	^ SingleMeasure amount: interval first unit: unit! !
 
-!DistanceInterval methodsFor: 'comparing' stamp: 'NC 6/4/2017 20:52:30'!
+!MeasureInterval methodsFor: 'comparing' stamp: 'PV 6/8/2017 16:01:42'!
 hash
 
 	^ self from amountInBase * self to amountInBase * self by amountInBase! !
 
-!DistanceInterval methodsFor: 'initialization' stamp: 'NC 5/28/2017 17:19:25'!
+!MeasureInterval methodsFor: 'initialization' stamp: 'PV 6/8/2017 16:01:42'!
 initializeWithInterval: anInterval andUnit: aUnit
 	
 	interval := anInterval.
 	unit := aUnit! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:16:16'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 interval
 
 	^ interval! !
 
-!DistanceInterval methodsFor: 'removing' stamp: 'PV 6/4/2017 10:23:04'!
+!MeasureInterval methodsFor: 'removing' stamp: 'PV 6/8/2017 16:01:42'!
 remove: oldObject ifAbsent: anExceptionBlock 
 	"SequencableCollections, like DistanceIntervals, cannot implement removing."
 
 	self shouldNotImplement! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 5/28/2017 18:20:41'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 size
 	 
 	^ interval size! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'NC 6/8/2017 00:12:57'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 to
 	
 	^ SingleMeasure amount: interval last unit: unit! !
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'PV 5/30/2017 16:17:17'!
+!MeasureInterval methodsFor: 'accessing' stamp: 'PV 6/8/2017 16:01:42'!
 unit
 
 	^ unit! !
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 6/8/2017 00:13:00'!
-from: startDistance to: stopDistance
+!MeasureInterval class methodsFor: 'error description' stamp: 'PV 6/8/2017 16:12:12'!
+differentMeasureTypesErrorDescription
 
-	^ self from: startDistance to: stopDistance by: (SingleMeasure amount: 1 unit: startDistance unit)
+	^ 'Measures are of different type.'! !
+
+!MeasureInterval class methodsFor: 'instance creation' stamp: 'PV 6/8/2017 16:03:11'!
+from: startMeasure to: stopMeasure
+
+	^ self from: startMeasure to: stopMeasure by: (SingleMeasure amount: 1 unit: startMeasure unit)
 ! !
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'NC 6/4/2017 21:04:21'!
-from: startDistance to: stopDistance by: stepDistance
-	"unMetro to: diezKilometros by: cincoCentimetros
-	from: 1 to: 10000 by: 0.05 unit: centimetros
-	"
-	
+!MeasureInterval class methodsFor: 'instance creation' stamp: 'PV 6/8/2017 16:15:11'!
+from: startMeasure to: stopMeasure by: stepMeasure
 	| unit |
 
-	unit := stepDistance unit.
+	((startMeasure isSameTypeAs: stopMeasure) and: [
+		startMeasure isSameTypeAs: stepMeasure
+		]) ifFalse: [
+			self error: self differentMeasureTypesErrorDescription 
+			].
+
+	unit := stepMeasure unit.
 
 	^ self interval:
 		(Interval
-			from: (startDistance amountIn: unit)
-			to: (stopDistance amountIn: unit)
-			by: stepDistance amount)
+			from: (startMeasure amountIn: unit)
+			to: (stopMeasure amountIn: unit)
+			by: stepMeasure amount)
 		unit: unit
 		
 ! !
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'PV 5/30/2017 15:49:38'!
-interval: anInterval unit: aDistanceUnit
+!MeasureInterval class methodsFor: 'private' stamp: 'PV 6/8/2017 16:15:52'!
+interval: anInterval unit: aMeasureUnit
 
-	^ self new initializeWithInterval: anInterval andUnit: aDistanceUnit ! !
+	^ self new initializeWithInterval: anInterval andUnit: aMeasureUnit! !
 
 !CatedraDistanceTest methodsFor: 'distance units' stamp: 'NC 6/4/2017 22:32:35'!
 centimeter
@@ -1324,7 +1336,7 @@ test16CantConvertAUnitToAnotherOfDifferentType
 	
 	! !
 
-!MeasureTest methodsFor: '4 - Test compound' stamp: 'NC 6/8/2017 07:45:19'!
+!MeasureTest methodsFor: '4 - Test compound' stamp: 'PV 6/8/2017 15:21:50'!
 test17CanCreateCompoundMeasures
 
 	| speedMeasure  |
@@ -1335,6 +1347,7 @@ test17CanCreateCompoundMeasures
 	
 	self assert: speedMeasure amount equals: 10.
 	self assert: speedMeasure printString equals: '10 meter / second'.
+	self assert: speedMeasure unit equals: factory meter / factory second.
 	
 	"50 metros/(segundo*segundo) (aceleracion)"
 	! !
@@ -1404,6 +1417,48 @@ test22CompoundMeasuresHaveOrder
 	aNewSpeed := factory finalSpeedStartingAt: speed accelerating: acceleration during: time.
 	
 	self assert: aNewSpeed < (aNewSpeed + speed).! !
+
+!MeasureTest methodsFor: '5 - Test interval protocol' stamp: 'PV 6/8/2017 16:52:54'!
+test23IntervalOfDistancesCanBeCreatedBecauseTheyDefineATotalOrder
+
+	factory assert: (factory oneCelsius to: factory thirtyTwoFahrenheits) from = factory oneCelsius	! !
+
+!MeasureTest methodsFor: '5 - Test interval protocol' stamp: 'PV 6/8/2017 16:57:28'!
+test24MeasureIntervalCanBeEnumeratedUsingDo
+
+	| value |
+	
+	value := 1.
+	(factory oneCelsius to: (factory oneCelsius * 10)) do: [ :aMeasure |
+		self assert: aMeasure amount = value.
+		value := value + 1 ].
+	
+	self assert: value = 11! !
+
+!MeasureTest methodsFor: '5 - Test interval protocol' stamp: 'PV 6/8/2017 17:18:37'!
+test25MeasureIntervalCanBeEnumeratedWithSpecificStep
+
+	| value initialMeasure byMeasure finalMeasure |
+	
+	initialMeasure := factory oneMeter.
+	byMeasure := factory twoMeters.
+	finalMeasure := initialMeasure * 9.
+	value := initialMeasure amount.
+		
+	(initialMeasure to: finalMeasure by:  byMeasure) do: [ :aMeasure |
+		self assert: aMeasure amount = value.
+		value := value + byMeasure amount ].
+	
+	self assert:  value = (finalMeasure amount + byMeasure amount)
+! !
+
+!MeasureTest methodsFor: '5 - Test interval protocol' stamp: 'PV 6/8/2017 17:24:50'!
+test26TryingToCreateAnIntervalWithDifferentTypeOfMeasuresRaisesAnError
+
+	self should: [ factory threeLiters to: factory oneDay ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :error |
+			self assert: error messageText equals: MeasureInterval differentMeasureTypesErrorDescription ].! !
 
 !CompoundMeasure methodsFor: 'arithmetic' stamp: 'NC 6/7/2017 23:51:47'!
 + aMeasure
@@ -1624,10 +1679,10 @@ ninetyCentimeters
 
 	^ self centimeters: 90! !
 
-!MeasureFactory methodsFor: 'temperature measures' stamp: 'NC 6/8/2017 00:14:41'!
+!MeasureFactory methodsFor: 'temperature measures' stamp: 'PV 6/8/2017 16:45:22'!
 oneCelsius
 
-	^ SingleMeasure amount: 1 unit: self celcius! !
+	^ SingleMeasure amount: 1 unit: self celsius! !
 
 !MeasureFactory methodsFor: 'distance measures' stamp: 'PV 5/30/2017 14:56:21'!
 oneCentimeter
@@ -1769,10 +1824,10 @@ twentyFourHours
 
 	^ SingleMeasure amount: 24 unit: self hour! !
 
-!MeasureFactory methodsFor: 'temperature measures' stamp: 'NC 6/8/2017 00:13:59'!
+!MeasureFactory methodsFor: 'temperature measures' stamp: 'PV 6/8/2017 16:45:14'!
 twoCelsius
 
-	^ SingleMeasure amount: 2 unit: self celcius! !
+	^ SingleMeasure amount: 2 unit: self celsius! !
 
 !MeasureFactory methodsFor: 'distance measures' stamp: 'PV 5/30/2017 14:59:10'!
 twoHundredCentimeters
@@ -1879,11 +1934,11 @@ zeroSeconds
 	
 	self subclassResponsibility ! !
 
-!Unit methodsFor: 'arithmetic' stamp: 'NC 6/8/2017 00:14:56'!
+!Unit methodsFor: 'arithmetic' stamp: 'PV 6/8/2017 15:14:25'!
 adaptToNumber: aMultiplier andSend: anOperationSymbol
 
 	anOperationSymbol = #* ifFalse: [
-		self error: 'Units only knows how to adapt to a number when the operation is the multiplication' ].
+		self error: 'Units only know how to adapt to a number when the operation is the multiplication' ].
 
 	^ SingleMeasure amount: aMultiplier unit: self! !
 
@@ -1949,12 +2004,13 @@ simplify
 	
 	self subclassResponsibility ! !
 
-!Unit class methodsFor: 'kelvin and derived' stamp: 'Nc 6/7/2017 03:39:00'!
+!Unit class methodsFor: 'kelvin and derived' stamp: 'PV 6/8/2017 16:48:39'!
 celsius
 	
-	^ DerivedUnit withName: 'celsius' aBaseUnit: self kelvin 
- 		aConvertToBaseBlock: [ :anAmount | anAmount + 273.1515 ] 
-		andAConvertFromBaseBlock: [ :anAmount | anAmount - 273.15 ].! !
+	^ DerivedUnit withName: 'celsius' aBaseUnit: self kelvin
+		"273.15 = 5463/20"
+ 		aConvertToBaseBlock: [ :anAmount | anAmount + (5463/20) ] 
+		andAConvertFromBaseBlock: [ :anAmount | anAmount - (5463/20) ].! !
 
 !Unit class methodsFor: 'meter and derived' stamp: 'NC 6/4/2017 20:27:39'!
 centimeter
@@ -1981,12 +2037,12 @@ dolar
 	
 	^ BaseUnit withName: 'dolar'! !
 
-!Unit class methodsFor: 'kelvin and derived' stamp: 'Nc 6/7/2017 03:46:17'!
+!Unit class methodsFor: 'kelvin and derived' stamp: 'PV 6/8/2017 16:50:49'!
 fahrenheit
 	
 	^ DerivedUnit withName: 'fahrenheit' aBaseUnit: self kelvin 
- 		aConvertToBaseBlock: [ :anAmount | 5/9 * (anAmount - 32) + 273 ] 
-		andAConvertFromBaseBlock: [ :anAmount | 9/5 * (anAmount - 273)  + 32 ].! !
+ 		aConvertToBaseBlock: [ :anAmount | 5/9 * (anAmount - 32) + (5463/20) ] 
+		andAConvertFromBaseBlock: [ :anAmount | 9/5 * (anAmount - (5463/20))  + 32 ].! !
 
 !Unit class methodsFor: 'gram and derived' stamp: 'NC 6/4/2017 20:45:30'!
 gram
