@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier february2007 february2015 aCreditCard aDate aPastDate february2019'
+	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier february2007 february2015 aCreditCard aPastDate february2019 aSalesBook'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -147,7 +147,7 @@ should: aBlock raiseErrorThat: anAssertionBlock
 		withExceptionDo: anAssertionBlock! !
 
 
-!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/24/2017 10:38:09'!
+!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/24/2017 11:05:15'!
 setUp
 
 	| oneItemPriceList twoItemPriceList |
@@ -161,8 +161,9 @@ setUp
 	newCart := Cart newWithPriceList: oneItemPriceList.
 	newCartWithFullCatalogue := Cart newWithPriceList: twoItemPriceList.
 	
+	aSalesBook := SalesBook new.
+
 	aCashier := self cashier.
-	"Cashier newWithPriceList: twoItemPriceList."
 	
 	february2007 := Month month: 'february' year: 2007. 
 	february2015 := Month month: 'february' year: 2015.
@@ -175,10 +176,10 @@ setUp
 	! !
 
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:40:37'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:04:16'!
 cashier
 
-	^ Cashier new! !
+	^ Cashier newWithSalesBook: aSalesBook! !
 
 !TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:19:25'!
 checkout: aCart
@@ -190,19 +191,23 @@ checkout: aCart onDate: aDate
 
 	^ aCashier checkoutCart: aCart payingWith: aCreditCard onDate: aDate! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:36:30'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:09:54'!
 test17IfCheckoutIsSuccessfulTheSalesBookShouldHaveOneMoreRegister
 
-"	| salesBefore |
+	| salesBefore salesAfter |
 
 	newCart add: aBook.
+	salesBefore := aCashier salesBook salesCount.
 	self checkout: newCart.
-	salesBefore := SalesBook salesCount.
+	salesAfter := aCashier salesBook salesCount.
 
-	self assert: SalesBook salesCount equals: salesBefore + 1"
+	self assert: salesAfter equals: salesBefore + 1
 "
 test18IfMerchantProcessorIsOutOfServiceTusLibrosInputFileShouldHaveOneMoreRegister
 "! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:24:34'!
+test18IfMerchantProcessorIsOutOfServiceTusLibrosInputFileShouldHaveOneMoreRegister! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
@@ -299,12 +304,12 @@ newWithPriceList: aPriceList
 
 !classDefinition: #Cashier category: #'TusLibros-Solution'!
 Object subclass: #Cashier
-	instanceVariableNames: 'priceList'
+	instanceVariableNames: 'salesBook salesCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Cashier methodsFor: 'cashier operations' stamp: 'NC 6/18/2017 19:39:29'!
+!Cashier methodsFor: 'cashier operations' stamp: 'PV 6/24/2017 11:20:31'!
 checkoutCart: aCart payingWith: aCreditCard onDate: aDate 
 
 	| resultingTicket |
@@ -315,6 +320,8 @@ checkoutCart: aCart payingWith: aCreditCard onDate: aDate
 	resultingTicket := self getTicketForCart: aCart.
 	
 	self debit: resultingTicket total from: aCreditCard.
+	
+	salesBook successfulSale: resultingTicket.
 	
 	^ resultingTicket.
 	
@@ -327,11 +334,6 @@ debit: anAmount from: aCreditCard
 	! !
 
 
-!Cashier methodsFor: 'initialization' stamp: 'NC 6/18/2017 12:50:57'!
-initializeWithPriceList: aPriceList
-	
-	priceList := aPriceList.! !
-
 
 !Cashier methodsFor: 'private' stamp: 'PV 6/24/2017 10:42:53'!
 getTicketForCart: aCart
@@ -343,6 +345,18 @@ getTicketForCart: aCart
 	cartContents asSet do: [ :product | costs at: product put: (cartContents occurrencesOf: product) * (aCart priceOf: product ) ].
 	
 	^ Ticket newWithProducts: cartContents andCosts: costs.! !
+
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:17:51'!
+initializeWithSalesBook: aSalesBook 
+
+	salesBook := aSalesBook! !
+
+
+!Cashier methodsFor: 'accessing' stamp: 'PV 6/24/2017 11:14:31'!
+salesBook
+
+	^ salesBook! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -372,6 +386,12 @@ newWithPriceList: aPriceList
 	aPriceList isEmpty ifTrue: [ self error: self emptyPriceListErrorDescription ].
 	
 	^ self new initializeWithPriceList: aPriceList ! !
+
+
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:06:42'!
+newWithSalesBook: aSalesBook 
+
+	^ self new initializeWithSalesBook: aSalesBook ! !
 
 
 !classDefinition: #CreditCard category: #'TusLibros-Solution'!
@@ -428,6 +448,27 @@ Object subclass: #SalesBook
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'SalesBook class' category: #'TusLibros-Solution'!
+SalesBook class
+	instanceVariableNames: 'salesCount'!
+
+!SalesBook class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:19:12'!
+new
+
+	salesCount := 0! !
+
+!SalesBook class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:23:47'!
+salesCount
+
+	^ salesCount ! !
+
+!SalesBook class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:22:53'!
+successfulSale: aTicket 
+
+	salesCount := salesCount + 1! !
 
 
 !classDefinition: #Ticket category: #'TusLibros-Solution'!
