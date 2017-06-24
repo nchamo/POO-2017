@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier february2007 february2015 aCreditCard aPastDate february2019 aSalesBook'
+	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier february2007 february2015 aCreditCard aPastDate february2019 aSalesBook mPSimulator'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -147,7 +147,7 @@ should: aBlock raiseErrorThat: anAssertionBlock
 		withExceptionDo: anAssertionBlock! !
 
 
-!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/24/2017 11:05:15'!
+!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/24/2017 14:32:35'!
 setUp
 
 	| oneItemPriceList twoItemPriceList |
@@ -172,6 +172,8 @@ setUp
 	aCreditCard := CreditCard newWithValidFrom: february2007 andExpirationDate: february2019.
 	
 	aPastDate := Date year: 2006 day: 1.
+	
+	mPSimulator := MerchantProcessorSimulator new
 
 	! !
 
@@ -208,6 +210,16 @@ test18IfMerchantProcessorIsOutOfServiceTusLibrosInputFileShouldHaveOneMoreRegist
 
 !TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:24:34'!
 test18IfMerchantProcessorIsOutOfServiceTusLibrosInputFileShouldHaveOneMoreRegister! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:49:49'!
+test19CantPayWithCardWithNotEnoughCredit
+
+	newCart add: aBook.
+	mPSimulator addCardWithNoCredit:  aCreditCard.
+
+	self
+		should: [ self checkout: newCart ]
+		raiseErrorThat: [ :error | self assert: error messageText equals: Cashier notEnoughCreditErrorDescription]! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
@@ -442,30 +454,48 @@ dateFromMonthYear: aMonthInAYear
 	^ Date newDay: 1 month: aMonthInAYear name year: aMonthInAYear yearNumber.! !
 
 
-!classDefinition: #SalesBook category: #'TusLibros-Solution'!
-Object subclass: #SalesBook
-	instanceVariableNames: ''
+!classDefinition: #MerchantProcessorSimulator category: #'TusLibros-Solution'!
+Object subclass: #MerchantProcessorSimulator
+	instanceVariableNames: 'cardsWithNoCredit validCards'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:50:42'!
+addCardWithNoCredit: aCreditCard 
 
-!classDefinition: 'SalesBook class' category: #'TusLibros-Solution'!
-SalesBook class
-	instanceVariableNames: 'salesCount'!
+	cardsWithNoCredit add: aCreditCard! !
 
-!SalesBook class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:19:12'!
-new
+!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:51:09'!
+addValidCard: aCreditCard 
+
+	validCards add: aCreditCard! !
+
+!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:52:09'!
+initialize
+
+	validCards := Set new.
+	cardsWithNoCredit := Set new! !
+
+
+!classDefinition: #SalesBook category: #'TusLibros-Solution'!
+Object subclass: #SalesBook
+	instanceVariableNames: 'salesCount'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!SalesBook methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:40:11'!
+initialize
 
 	salesCount := 0! !
 
-!SalesBook class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:23:47'!
+!SalesBook methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:40:36'!
 salesCount
 
 	^ salesCount ! !
 
-!SalesBook class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 11:22:53'!
+!SalesBook methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 14:41:05'!
 successfulSale: aTicket 
 
 	salesCount := salesCount + 1! !
