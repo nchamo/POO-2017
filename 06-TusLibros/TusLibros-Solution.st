@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier february2007 february2015 aCreditCard aDate'
+	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier february2007 february2015 aCreditCard aDate aPastDate february2019'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -62,37 +62,31 @@ test08CartCantBeModifiedByChangingItsContents
 	
 	self assert: newCart isEmpty! !
 
-!TusLibrosTest methodsFor: '01 - Cart' stamp: 'NC 6/18/2017 11:57:02'!
+!TusLibrosTest methodsFor: '01 - Cart' stamp: 'PV 6/24/2017 10:52:35'!
 test09CantAddToCartProductsThatDontBelongToTheCatalogue
 
 	self should: [ newCart add: anotherBook ] 
 		  raiseErrorThat: [ :error | 
-				self assert: error messageText = Cart notInCatalogueErrorDescription.
+				self assert: error messageText = Cart notInPriceListErrorDescription.
 				self assert: newCart isEmpty ]! !
 
-!TusLibrosTest methodsFor: '01 - Cart' stamp: 'NC 6/18/2017 11:57:04'!
+!TusLibrosTest methodsFor: '01 - Cart' stamp: 'PV 6/24/2017 10:54:45'!
 test10CantCreateCartWithEmptyCatalogue
-	
-	| newCart |
-		
-	self should: [ newCart := Cart newWithCatalogue: {} ] 
+
+	self should: [ Cart newWithPriceList: Dictionary new ] 
 		  raiseErrorThat: [ :error | 
-			self assert: error messageText equals: Cart emptyCatalogueErrorDescription.
-			self assert: newCart isNil ]! !
+			self assert: error messageText equals: Cart emptyPriceListErrorDescription.]! !
 
 
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/18/2017 18:55:06'!
+!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'PV 6/24/2017 10:05:35'!
 test11CantCheckoutIfCartIsEmpty
 
-	| resultingTicket |
-
-	self should: [ resultingTicket := aCashier checkoutCart: newCart payingWith: aCreditCard onDate: aDate ] 
+	self should: [ self checkout: newCart ] 
 		  raiseErrorThat: [ :error | 
-			self assert: error messageText equals: Cashier emptyCartCheckoutErrorDescription.
-			self assert: resultingTicket isNil ]
+			self assert: error messageText equals: Cashier emptyCartCheckoutErrorDescription.]
 			! !
 
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/18/2017 18:54:48'!
+!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'PV 6/24/2017 10:07:46'!
 test12ResultingTicketHasTheCorrectAmounts
 
 	| resultingTicket |
@@ -100,8 +94,8 @@ test12ResultingTicketHasTheCorrectAmounts
 	newCartWithFullCatalogue 	add: aBook times: 2;
 									add: anotherBook times: 3;
 			 						add: aBook times: 3.
-				
-	resultingTicket := aCashier checkoutCart: newCartWithFullCatalogue payingWith: aCreditCard onDate: aDate.
+
+	resultingTicket := self checkout: newCartWithFullCatalogue.
 				
 	self assert: (resultingTicket occurrencesOf: aBook) equals: 5.
 	self assert: (resultingTicket occurrencesOf: anotherBook) equals: 3.
@@ -109,7 +103,7 @@ test12ResultingTicketHasTheCorrectAmounts
 	
 			! !
 
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/18/2017 19:45:11'!
+!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'PV 6/24/2017 10:07:01'!
 test13ResultingTicketHasTheCorrectPrices
 
 	| resultingTicket |
@@ -117,49 +111,32 @@ test13ResultingTicketHasTheCorrectPrices
 	newCartWithFullCatalogue 	add: aBook times: 1;
 									add: anotherBook times: 2;
 			 						add: aBook times: 3.
-				
-	resultingTicket := aCashier checkoutCart: newCartWithFullCatalogue payingWith: aCreditCard onDate: aDate.
+
+	resultingTicket := self checkout: newCartWithFullCatalogue.
 				
 	self assert: (resultingTicket totalCostOf: aBook) equals: 44.
 	self assert: (resultingTicket totalCostOf: anotherBook) equals: 40.
 	self assert: resultingTicket total equals: 84.
 			! !
 
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/18/2017 12:58:04'!
-test14CashierCantTakeEmptyPriceList
-
-	| newCashier |
-
-	self should: [ newCashier := Cashier newWithPriceList: Dictionary new] 
-		  raiseErrorThat: [ :error | 
-			self assert: error messageText equals: Cashier emptyPriceListErrorDescription.
-			self assert: newCashier isNil ]
-			! !
-
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/18/2017 18:53:43'!
+!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'PV 6/24/2017 10:18:58'!
 test15CantPayWithExpiredCreditCard
 
-	| resultingTicket anInvalidDate |
-	
-	anInvalidDate := Date year: 2016 day: 1.
 	newCart add: aBook .
 
-	self should: [ resultingTicket := aCashier checkoutCart: newCart payingWith: aCreditCard onDate: anInvalidDate ] 
+	self should: [ self checkout: newCart onDate: aPastDate ] 
 		  raiseErrorThat: [ :error | 
-			self assert: error messageText equals: Cashier expiredCreditCardErrorDescription.
-			self assert: resultingTicket isNil ]
+			self assert: error messageText equals: Cashier expiredCreditCardErrorDescription ]
 			! !
 
 
-!TusLibrosTest methodsFor: '03 - Credit card' stamp: 'NC 6/18/2017 13:55:43'!
+!TusLibrosTest methodsFor: '03 - Credit card' stamp: 'PV 6/24/2017 10:19:59'!
 test16ValidFromDateCantHappenAfterExpirationDate
 	
-	| newCreditCard |
-	
-	self should: [ newCreditCard := CreditCard newWithValidFrom: february2015 andExpirationDate: february2007 ] 
+	self should: [ CreditCard newWithValidFrom: february2015 andExpirationDate: february2007 ] 
 		  raiseErrorThat: [ :error | 
-			self assert: error messageText equals: CreditCard validFromMustHappenBeforeExpirationDateErrorDescription.
-			self assert: newCreditCard isNil ]! !
+			self assert: error messageText equals: 
+				CreditCard validFromMustHappenBeforeExpirationDateErrorDescription ]! !
 
 
 !TusLibrosTest methodsFor: 'asserting' stamp: 'NC 6/18/2017 11:56:48'!
@@ -170,7 +147,7 @@ should: aBlock raiseErrorThat: anAssertionBlock
 		withExceptionDo: anAssertionBlock! !
 
 
-!TusLibrosTest methodsFor: 'setUp' stamp: 'NC 6/18/2017 18:54:17'!
+!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/24/2017 10:38:09'!
 setUp
 
 	| oneItemPriceList twoItemPriceList |
@@ -184,21 +161,53 @@ setUp
 	newCart := Cart newWithPriceList: oneItemPriceList.
 	newCartWithFullCatalogue := Cart newWithPriceList: twoItemPriceList.
 	
-	aCashier := Cashier newWithPriceList: twoItemPriceList .
+	aCashier := self cashier.
+	"Cashier newWithPriceList: twoItemPriceList."
 	
 	february2007 := Month month: 'february' year: 2007. 
 	february2015 := Month month: 'february' year: 2015.
+	february2019 := Month month: 'february' year: 2019.
 	
-	aCreditCard := CreditCard newWithValidFrom: february2007 andExpirationDate: february2015.
+	aCreditCard := CreditCard newWithValidFrom: february2007 andExpirationDate: february2019.
 	
-	aDate := Date year: 2010 day: 1.
+	aPastDate := Date year: 2006 day: 1.
 
 	! !
+
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:40:37'!
+cashier
+
+	^ Cashier new! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:19:25'!
+checkout: aCart
+
+	^ self checkout: aCart onDate: Date today! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:12:43'!
+checkout: aCart onDate: aDate
+
+	^ aCashier checkoutCart: aCart payingWith: aCreditCard onDate: aDate! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:36:30'!
+test17IfCheckoutIsSuccessfulTheSalesBookShouldHaveOneMoreRegister
+
+"	| salesBefore |
+
+	newCart add: aBook.
+	self checkout: newCart.
+	salesBefore := SalesBook salesCount.
+
+	self assert: SalesBook salesCount equals: salesBefore + 1"
+"
+test18IfMerchantProcessorIsOutOfServiceTusLibrosInputFileShouldHaveOneMoreRegister
+"! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
 Object subclass: #Cart
-	instanceVariableNames: 'products catalogue'
+	instanceVariableNames: 'products priceList'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -214,21 +223,21 @@ add: aProduct
 
 	self add: aProduct times: 1! !
 
-!Cart methodsFor: 'adding' stamp: 'PV 6/17/2017 15:35:50'!
+!Cart methodsFor: 'adding' stamp: 'PV 6/24/2017 10:52:04'!
 add: aProduct times: aNumber
 
 	(aNumber negative or: [ aNumber isZero ]) ifTrue: [ self error: self class notPositiveAddErrorDescription ].
 	aNumber isInteger ifFalse: [ self error: self class nonIntegerAddErrorDescription ].
 
-	(catalogue includes: aProduct) ifFalse: [ self error: self class notInCatalogueErrorDescription ].
+	(priceList includesKey: aProduct) ifFalse: [ self error: self class notInPriceListErrorDescription ].
 	
 	products add: aProduct withOccurrences: aNumber! !
 
 
-!Cart methodsFor: 'initialization' stamp: 'PV 6/15/2017 17:56:03'!
-initializeWithCatalogue: aCatalogue
+!Cart methodsFor: 'initialization' stamp: 'PV 6/24/2017 10:47:32'!
+initializeWithPriceList: aPriceList
 
-	catalogue := aCatalogue.
+	priceList := aPriceList.
 	products := Bag new! !
 
 
@@ -247,26 +256,32 @@ isEmpty
 
 	^ products isEmpty! !
 
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 10:53:33'!
+priceOf: anObject 
+
+	^ priceList at: anObject! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Cart class' category: #'TusLibros-Solution'!
 Cart class
 	instanceVariableNames: ''!
 
-!Cart class methodsFor: 'error descriptions' stamp: 'PV 6/15/2017 19:56:14'!
-emptyCatalogueErrorDescription
+!Cart class methodsFor: 'error descriptions' stamp: 'PV 6/24/2017 10:54:18'!
+emptyPriceListErrorDescription
 
-	^ 'Can''t create a cart with an empty catalogue'! !
+	^ 'Can''t create a cart with an empty price list'! !
 
 !Cart class methodsFor: 'error descriptions' stamp: 'PV 6/17/2017 20:45:03'!
 nonIntegerAddErrorDescription
 
 	^ 'Can''t add product to cart a non-integer number of times'! !
 
-!Cart class methodsFor: 'error descriptions' stamp: 'PV 6/15/2017 17:50:28'!
-notInCatalogueErrorDescription
+!Cart class methodsFor: 'error descriptions' stamp: 'PV 6/24/2017 10:49:33'!
+notInPriceListErrorDescription
 
-	^ 'Can''t add to cart a product that doesn''t belong to the catalogue'! !
+	^ 'Can''t add to cart a product that doesn''t belong to the price list'! !
 
 !Cart class methodsFor: 'error descriptions' stamp: 'PV 6/17/2017 20:45:12'!
 notPositiveAddErrorDescription
@@ -274,17 +289,12 @@ notPositiveAddErrorDescription
 		^ 'Can''t add to cart a product a not positive number of times'! !
 
 
-!Cart class methodsFor: 'instance creation' stamp: 'PV 6/17/2017 14:46:27'!
-newWithCatalogue: aCatalogue
-
-	aCatalogue isEmpty ifTrue: [ self error: self emptyCatalogueErrorDescription ].
-
-	^ self new initializeWithCatalogue: aCatalogue! !
-
-!Cart class methodsFor: 'instance creation' stamp: 'NC 6/18/2017 12:49:14'!
+!Cart class methodsFor: 'instance creation' stamp: 'PV 6/24/2017 10:54:35'!
 newWithPriceList: aPriceList
 
-	^ self newWithCatalogue: aPriceList keys.! !
+	aPriceList isEmpty ifTrue: [ self error: self emptyPriceListErrorDescription ].
+
+	^ self new initializeWithPriceList: aPriceList! !
 
 
 !classDefinition: #Cashier category: #'TusLibros-Solution'!
@@ -323,14 +333,14 @@ initializeWithPriceList: aPriceList
 	priceList := aPriceList.! !
 
 
-!Cashier methodsFor: 'private' stamp: 'NC 6/18/2017 19:39:43'!
+!Cashier methodsFor: 'private' stamp: 'PV 6/24/2017 10:42:53'!
 getTicketForCart: aCart
 	
 	| cartContents costs |
 	costs := Dictionary new.
 	cartContents := aCart contents.
 
-	cartContents asSet do: [ :product | costs at: product put: (cartContents occurrencesOf: product) * (priceList at: product ) ].
+	cartContents asSet do: [ :product | costs at: product put: (cartContents occurrencesOf: product) * (aCart priceOf: product ) ].
 	
 	^ Ticket newWithProducts: cartContents andCosts: costs.! !
 
@@ -378,10 +388,12 @@ initializeWithValidFromDate: aDate andExpirationDate: anotherDate
 	expirationDate := anotherDate.! !
 
 
-!CreditCard methodsFor: 'testing' stamp: 'NC 6/18/2017 18:50:29'!
+!CreditCard methodsFor: 'testing' stamp: 'PV 6/22/2017 13:50:47'!
 isExpiredOn: aDate
 	
-	^ aDate < (self class dateFromMonthYear: validFrom) or: [ (self class dateFromMonthYear: expirationDate) < aDate ]! !
+	^ aDate < (self class dateFromMonthYear: validFrom) or: [ (self class dateFromMonthYear: expirationDate) < aDate ]
+	
+	"el primer caso no significa que está vencida, sino que todavía no está vigente"! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -408,6 +420,14 @@ newWithValidFrom: aDate andExpirationDate: anotherDate
 dateFromMonthYear: aMonthInAYear
 	
 	^ Date newDay: 1 month: aMonthInAYear name year: aMonthInAYear yearNumber.! !
+
+
+!classDefinition: #SalesBook category: #'TusLibros-Solution'!
+Object subclass: #SalesBook
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
 
 
 !classDefinition: #Ticket category: #'TusLibros-Solution'!
