@@ -144,6 +144,11 @@ test15MerchantProcessorErrorIsntHandledByCashier
 			self assertSalesBookHasntChanged: aSalesBook ]! !
 
 
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 17:52:01'!
+simulateMoreThanHalfAnHourTimePassedForCarts: restInterface
+
+	restInterface substractTimeToCartsActivity: 30 minutes + 1 seconds! !
+
 !TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 14:20:44'!
 test21NewCartRequestedByRestInterfaceIsEmpty
 
@@ -225,6 +230,18 @@ test27CanListPurchasesOfACustomerThroughRestInterface
 	books := restInterface listAllBooksBoughtOfClientId: 1 andPassword: 'password'.
 	
 	"self assert: books equals: (Dictionary newFrom: {aBook -> 3})"! !
+
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 18:04:54'!
+test28CartIsInvalidThroughRestInterfaceIfItWasInactiveForMoreThan30Minutes
+
+	| newCartId |
+
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
+	
+	self simulateMoreThanHalfAnHourTimePassedForCarts: restInterface.
+	
+	self should: [ restInterface listCart: newCartId ]
+		raiseErrorThat: [ :error | self assert: error messageText equals: RestInterface cartTimeOutErrorDescription]! !
 
 
 !TusLibrosTest methodsFor: 'asserting' stamp: 'NC 6/25/2017 15:48:44'!
@@ -544,19 +561,21 @@ newWithClosure: aBlockClosure
 
 !classDefinition: #RestInterface category: #'TusLibros-Solution'!
 Object subclass: #RestInterface
-	instanceVariableNames: 'salesBook priceList mP clientPasswords cartsIds transactionIds'
+	instanceVariableNames: 'salesBook priceList mP clientPasswords cartsIds transactionIds cartsLastActivityTS'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 18:57:11'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 17:46:29'!
 addToCartWithID: cartId andBookIsbn: aBookIsbn andQuantity: aNumber
+
+	self verifyIfTimedOut: cartId.
 
 	(aNumber positive and: [ aNumber isInteger ]) ifFalse: [ self error: 'Quantity isn''t a positive integer' ].
 	
-	(cartsIds at: cartId) add: aBookIsbn times: aNumber
+	(cartsIds at: cartId) add: aBookIsbn times: aNumber.
 
-	! !
+	self updateLastActivityTimeStampForCartId: cartId.! !
 
 !RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 18:39:37'!
 cartWithId: anId 
@@ -595,12 +614,16 @@ listAllBooksBoughtOfClientId: aClientId andPassword: aPassword
 		
 	! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 19:07:32'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 17:28:47'!
 listCart: aCartId
+
+	self verifyIfTimedOut: aCartId.
+
+	self updateLastActivityTimeStampForCartId: aCartId.
 
 	^ (cartsIds at: aCartId) contents! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 14:20:25'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 17:19:17'!
 newCartForClientID: aClientId andPassword: aPassword
 
 	| cart cartId |
@@ -612,11 +635,29 @@ newCartForClientID: aClientId andPassword: aPassword
 	cart := Cart newWithPriceList: priceList.
 	cartId := cartsIds size.
 	cartsIds add: cartId -> cart.
+
+	self updateLastActivityTimeStampForCartId: cartId.
 	
 	^ cartId! !
 
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 18:06:16'!
+substractTimeToCartsActivity: aDuration
 
-!RestInterface methodsFor: 'initialization' stamp: 'PV 6/26/2017 15:34:53'!
+	cartsLastActivityTS := cartsLastActivityTS collect: [ :value | value - aDuration ]! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 18:01:53'!
+updateLastActivityTimeStampForCartId: cartId
+
+	cartsLastActivityTS at: cartId put: DateAndTime now! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 17:44:56'!
+verifyIfTimedOut: aCartId
+
+	DateAndTime now > ((cartsLastActivityTS at: aCartId) + 30 minutes)
+		ifTrue: [ self error: RestInterface cartTimeOutErrorDescription ]! !
+
+
+!RestInterface methodsFor: 'initialization' stamp: 'PV 6/26/2017 17:24:31'!
 initializeWithWithSalesBook: aSalesBook andPriceList: aPriceList andMP: aMerchantProcessorSimulator andClientsPasswords: aClientPassDict
 
 	salesBook := aSalesBook.
@@ -624,13 +665,19 @@ initializeWithWithSalesBook: aSalesBook andPriceList: aPriceList andMP: aMerchan
 	mP := aMerchantProcessorSimulator.
 	clientPasswords := aClientPassDict.
 	cartsIds := Dictionary new.
-	transactionIds := Dictionary new.! !
+	transactionIds := Dictionary new.
+	cartsLastActivityTS := Dictionary new.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'RestInterface class' category: #'TusLibros-Solution'!
 RestInterface class
 	instanceVariableNames: ''!
+
+!RestInterface class methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 17:44:31'!
+cartTimeOutErrorDescription
+
+	^ 'Cart timed out'! !
 
 !RestInterface class methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 14:03:52'!
 invalidClientPasswordCombinationErrorDescription
