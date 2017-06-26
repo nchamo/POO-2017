@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier aCreditCard aSalesBook aMP restInterface'
+	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier aCreditCard aSalesBook aMP restInterface aFutureMonth aCardNumber'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -114,38 +114,24 @@ test13CantPayWithExpiredCreditCard
 			self assertSalesBookHasntChanged: aSalesBook.
 			self assertMPWasntCalled: aMP ]! !
 
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/25/2017 16:49:16'!
+!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'PV 6/25/2017 20:04:03'!
 test14IfCheckoutIsSuccessfulTheSalesBookShouldHaveOneMoreRegister
 
+	| ticket |
+
 	newCart add: aBook.
 	
-	self checkoutWithValidCreditCard: newCart.
+	ticket := self checkoutWithValidCreditCard: newCart.
 
-	self assert: aSalesBook salesCount equals: 1! !
+	self assert: aSalesBook salesCount equals: 1.
+	self assert: (aSalesBook includes: ticket)! !
 
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/25/2017 16:47:19'!
-test15CantPayWithCardWithNotEnoughCredit
-
-	| mP cashier aValidDate |
-	
-	mP :=	MerchantProcessorSimulator newWithClosure: [ :card :amount | self error: MerchantProcessorSimulator notEnoughCreditErrorDescription ].
-	cashier := Cashier newWithSalesBook: aSalesBook andMP: mP.
-	aValidDate :=  Date newDay: 15 month: 6  year: 2017.
-	
-	newCart add: aBook.
-
-	self
-		should: [ cashier checkoutCart: newCart payingWith: aCreditCard onDate: aValidDate ]
-		raiseErrorThat: [ :error |
-			self assert: error messageText equals: MerchantProcessorSimulator notEnoughCreditErrorDescription.
-			self assertSalesBookHasntChanged: aSalesBook ]! !
-
-!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'NC 6/25/2017 16:44:36'!
-test16CantPayWithStolenCard
+!TusLibrosTest methodsFor: '02 - Cashier' stamp: 'PV 6/25/2017 20:17:46'!
+test15MerchantProcessorErrorIsntHandledByCashier
 
 	| mP cashier aValidDate |
 
-	mP :=	MerchantProcessorSimulator newWithClosure: [ :card :amount | self error: MerchantProcessorSimulator stolenCardErrorDescription ].
+	mP :=	MerchantProcessorSimulator newWithClosure: [ :card :amount | self error: MerchantProcessorSimulator defaultErrorDescription ].
 	cashier := Cashier newWithSalesBook: aSalesBook andMP: mP.
 	aValidDate :=  Date newDay: 15 month: 6  year: 2017.
 	
@@ -154,53 +140,91 @@ test16CantPayWithStolenCard
 	self
 		should: [ cashier checkoutCart: newCart payingWith: aCreditCard onDate: aValidDate ]
 		raiseErrorThat: [ :error | 
-			self assert: error messageText equals: MerchantProcessorSimulator stolenCardErrorDescription.
+			self assert: error messageText equals: MerchantProcessorSimulator defaultErrorDescription.
 			self assertSalesBookHasntChanged: aSalesBook ]! !
 
 
-!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/24/2017 18:39:02'!
-test21CartCreatedByRestInterfaceIsEmpty
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 14:20:44'!
+test21NewCartRequestedByRestInterfaceIsEmpty
 
 	| newCartId |
-	
-	newCartId := restInterface createCartWithClientID: 1 andPassword: 'password'.
+
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
 
 	self assert: (restInterface cartWithId: newCartId) isEmpty! !
 
-!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/24/2017 19:02:08'!
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 14:19:59'!
 test22CartContainsBookAfterAddingItThroughRestInterface
 	
 	| newCartId cart |
 	
-	newCartId := restInterface createCartWithClientID: 1 andPassword: 'password'.
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
 	cart := restInterface cartWithId: newCartId.
 	
 	restInterface addToCartWithID: newCartId andBookIsbn: aBook andQuantity: 1.
 
 	self assert: (cart includes: aBook)! !
 
-!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/24/2017 19:06:30'!
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 14:08:23'!
 test23RestInterfaceRespondsRightForACartContents
 	
 	| newCartId cart cartContents |
 	
-	newCartId := restInterface createCartWithClientID: 1 andPassword: 'password'.
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
 	cart := restInterface cartWithId: newCartId.
 	
 	cartContents := restInterface listCart: newCartId.
 
 	self assert: cartContents equals: cart contents! !
 
-!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'NC 6/25/2017 15:17:03'!
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 15:30:44'!
 test24CantCheckoutThroughRestInterfaceIfCartIsEmpty
 
-	| newCartId transactionNumber |
+	| newCartId |
 	
-	"newCartId := restInterface createCartWithClientID: 1 andPassword: 'password'.
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
 	
-	transactionNumber := restInterface checkoutCartId: newCartId ccn: aCardNumber cced: february2019 cco: 'Willy Coria'."
+	self
+		should: [ restInterface checkoutCartId: newCartId ccn: aCardNumber cced: aFutureMonth cco: 'John Doe' ]
+		raiseErrorThat: [ :error | self assert: error messageText equals: Cashier emptyCartCheckoutErrorDescription ]! !
 
-"	self assert: 	 equals: cart contents"! !
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 15:30:58'!
+test25CantCheckoutThroughRestInterfaceIfCartIsEmpty
+
+	| newCartId |
+	
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
+	
+	self
+		should: [ restInterface checkoutCartId: newCartId ccn: aCardNumber cced: aFutureMonth cco: 'John Doe' ]
+		raiseErrorThat: [ :error | self assert: error messageText equals: Cashier emptyCartCheckoutErrorDescription ]! !
+
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 15:42:22'!
+test26IfCheckoutThroughRestInterfaceIsSuccessfulShouldReturnATransactionId
+
+	| newCartId cart transactionId |
+	
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
+	cart := restInterface cartWithId: newCartId.
+	cart add: aBook.
+	
+	transactionId := restInterface checkoutCartId: newCartId ccn: aCardNumber cced: aFutureMonth cco: 'John Doe'.
+	
+	self assert: (restInterface includesTransactionId: transactionId)! !
+
+!TusLibrosTest methodsFor: '03 - Test Interface' stamp: 'PV 6/26/2017 15:58:45'!
+test27CanListPurchasesOfACustomerThroughRestInterface
+
+	| books newCartId cart |
+	
+	newCartId := restInterface newCartForClientID: 1 andPassword: 'password'.
+	cart := restInterface cartWithId: newCartId.
+	cart add: aBook times: 3.
+	restInterface checkoutCartId: newCartId ccn: aCardNumber cced: aFutureMonth cco: 'John Doe'.
+
+	books := restInterface listAllBooksBoughtOfClientId: 1 andPassword: 'password'.
+	
+	"self assert: books equals: (Dictionary newFrom: {aBook -> 3})"! !
 
 
 !TusLibrosTest methodsFor: 'asserting' stamp: 'NC 6/25/2017 15:48:44'!
@@ -229,7 +253,7 @@ should: aBlock raiseErrorThat: anAssertionBlock
 		withExceptionDo: anAssertionBlock! !
 
 
-!TusLibrosTest methodsFor: 'setUp' stamp: 'NC 6/25/2017 16:40:00'!
+!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/26/2017 14:42:52'!
 setUp
 
 	| oneItemPriceList aClientPassDict twoItemPriceList |
@@ -248,12 +272,16 @@ setUp
 	aMP := MerchantProcessorSimulator newWithClosure: [ :card :amount | true ].
 
 	aCashier := Cashier newWithSalesBook: aSalesBook andMP: aMP.
+
+	aFutureMonth := Month month: 'february' year: 2019.
 	
-	aCreditCard := CreditCard newWithExpirationDate: (Month month: 'february' year: 2019) andOwner: 'John Doe' andNumber: 0123456789012345.
+	aCreditCard := CreditCard newWithExpirationDate: aFutureMonth andOwner: 'John Doe' andNumber: 0123456789012345.
 	
 	aClientPassDict := Dictionary newFrom: { 1 -> 'password'. 2 -> 'clave'. 3 -> 'otraClave' }.
 	
-	restInterface := RestInterface newWithSalesBook: aSalesBook andPriceList: twoItemPriceList andMP: aMP andClientsPasswords: aClientPassDict.! !
+	restInterface := RestInterface newWithSalesBook: aSalesBook andPriceList: twoItemPriceList andMP: aMP andClientsPasswords: aClientPassDict.
+	
+	aCardNumber := '0123456789012345'! !
 
 
 !TusLibrosTest methodsFor: 'private' stamp: 'PV 6/24/2017 10:12:43'!
@@ -492,6 +520,11 @@ debit: amount from: aCreditCard
 MerchantProcessorSimulator class
 	instanceVariableNames: ''!
 
+!MerchantProcessorSimulator class methodsFor: 'error descriptions' stamp: 'PV 6/25/2017 20:16:23'!
+defaultErrorDescription
+
+	^ 'Transaction error'! !
+
 !MerchantProcessorSimulator class methodsFor: 'error descriptions' stamp: 'PV 6/24/2017 16:14:05'!
 notEnoughCreditErrorDescription
 
@@ -511,7 +544,7 @@ newWithClosure: aBlockClosure
 
 !classDefinition: #RestInterface category: #'TusLibros-Solution'!
 Object subclass: #RestInterface
-	instanceVariableNames: 'salesBook priceList mP clientPasswords cartsIds'
+	instanceVariableNames: 'salesBook priceList mP clientPasswords cartsIds transactionIds'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -530,41 +563,79 @@ cartWithId: anId
 
 	^ cartsIds at: anId! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 18:43:19'!
-createCartWithClientID: aNumber andPassword: aPasswordString 
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 15:39:39'!
+checkoutCartId: aCartId ccn: aCardNumber cced: aMonth cco: aName 
 
-	| cart |
-	(clientPasswords includesKey: aNumber)
+	| newCashier cart card ticket ticketId |
+	
+	self toDo: 'verificar tarjeta'.
+	
+	newCashier := Cashier newWithSalesBook: salesBook andMP: mP.
+	cart := cartsIds at: aCartId.
+	card := CreditCard newWithExpirationDate: aMonth andOwner: aName andNumber: aCardNumber.
+	
+	ticket := newCashier checkoutCart: cart payingWith: card onDate: Date today.
+	ticketId := transactionIds size.
+	transactionIds add: ticketId -> ticket.
+	
+	^ ticketId! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 15:42:37'!
+includesTransactionId: aTransactionId 
+
+	^ transactionIds includesKey: aTransactionId ! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 15:54:33'!
+listAllBooksBoughtOfClientId: aClientId andPassword: aPassword
+
+	(clientPasswords includesKey: aClientId)
 		ifFalse: [ self error: self class invalidClientPasswordCombinationErrorDescription ].
-	(clientPasswords at: aNumber) = aPasswordString
+	(clientPasswords at: aClientId) = aPassword
 		ifFalse: [ self error: self class invalidClientPasswordCombinationErrorDescription ].
-	
-	cart := Cart newWithPriceList: priceList.
-	
-	cartsIds add: cartsIds size -> cart.
-	
-	^ cartsIds size - 1! !
+		
+	! !
 
 !RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 19:07:32'!
 listCart: aCartId
 
 	^ (cartsIds at: aCartId) contents! !
 
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 14:20:25'!
+newCartForClientID: aClientId andPassword: aPassword
 
-!RestInterface methodsFor: 'initialization' stamp: 'PV 6/24/2017 18:37:17'!
+	| cart cartId |
+	(clientPasswords includesKey: aClientId)
+		ifFalse: [ self error: self class invalidClientPasswordCombinationErrorDescription ].
+	(clientPasswords at: aClientId) = aPassword
+		ifFalse: [ self error: self class invalidClientPasswordCombinationErrorDescription ].
+	
+	cart := Cart newWithPriceList: priceList.
+	cartId := cartsIds size.
+	cartsIds add: cartId -> cart.
+	
+	^ cartId! !
+
+
+!RestInterface methodsFor: 'initialization' stamp: 'PV 6/26/2017 15:34:53'!
 initializeWithWithSalesBook: aSalesBook andPriceList: aPriceList andMP: aMerchantProcessorSimulator andClientsPasswords: aClientPassDict
 
 	salesBook := aSalesBook.
 	priceList := aPriceList.
 	mP := aMerchantProcessorSimulator.
 	clientPasswords := aClientPassDict.
-	cartsIds := Dictionary new.! !
+	cartsIds := Dictionary new.
+	transactionIds := Dictionary new.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'RestInterface class' category: #'TusLibros-Solution'!
 RestInterface class
 	instanceVariableNames: ''!
+
+!RestInterface class methodsFor: 'as yet unclassified' stamp: 'PV 6/26/2017 14:03:52'!
+invalidClientPasswordCombinationErrorDescription
+
+	^ 'Invalida client-password combination'! !
 
 !RestInterface class methodsFor: 'as yet unclassified' stamp: 'PV 6/24/2017 17:56:46'!
 newWithSalesBook: aSalesBook andPriceList: aDictionary andMP: aMerchantProcessorSimulator andClientsPasswords: aClientPassDict
@@ -574,27 +645,33 @@ newWithSalesBook: aSalesBook andPriceList: aDictionary andMP: aMerchantProcessor
 
 !classDefinition: #SalesBook category: #'TusLibros-Solution'!
 Object subclass: #SalesBook
-	instanceVariableNames: 'salesCount'
+	instanceVariableNames: 'salesCount sales'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!SalesBook methodsFor: 'accessing' stamp: 'PV 6/24/2017 14:40:36'!
+!SalesBook methodsFor: 'accessing' stamp: 'PV 6/25/2017 19:58:26'!
 salesCount
 
-	^ salesCount ! !
+	^ sales size! !
 
 
-!SalesBook methodsFor: 'adding' stamp: 'PV 6/24/2017 14:41:05'!
+!SalesBook methodsFor: 'adding' stamp: 'PV 6/25/2017 19:48:08'!
 successfulSale: aTicket 
 
-	salesCount := salesCount + 1! !
+	sales add: aTicket.! !
 
 
-!SalesBook methodsFor: 'initialization' stamp: 'PV 6/24/2017 14:40:11'!
+!SalesBook methodsFor: 'initialization' stamp: 'PV 6/25/2017 19:48:21'!
 initialize
 
-	salesCount := 0! !
+	sales := Set new! !
+
+
+!SalesBook methodsFor: 'testing' stamp: 'PV 6/25/2017 20:07:20'!
+includes: aTicket 
+	
+	^ sales includes: aTicket ! !
 
 
 !classDefinition: #Ticket category: #'TusLibros-Solution'!
