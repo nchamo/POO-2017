@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier aCreditCard aSalesBook aMP restInterface feb2019 feb2018 eleven elevenTwenty elevenForty firstFeb2018 aClient'
+	instanceVariableNames: 'aBook anotherBook newCart newCartWithFullCatalogue aCashier aCreditCard aSalesBook aMP restInterface feb2019 feb2018 eleven elevenTwenty elevenForty firstFeb2018 aClient invalidClientAndPassword notInPriceListBook twelve anErrorMP restInterfaceWithErrorMP'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -143,19 +143,17 @@ test15MerchantProcessorErrorIsntHandledByCashier
 			self assertSalesBookHasntChanged: aSalesBook ]! !
 
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 21:02:54'!
-test20UnknownUserCantCreateACartOrListPurchases
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:50:49'!
+test16UnknownUserCantCreateACartOrListPurchases
 
-	self should: [ restInterface createCartForClientID: 100 andPassword: 'password' onDate: firstFeb2018 andTime: eleven ] 
+	self should: [ self createCartFor: invalidClientAndPassword ] 
 		raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface invalidClientPasswordCombinationErrorDescription].
 	
-	self should: [ restInterface listPurchasesClientId: 100 andPassword: 'password' ] 
-		raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface invalidClientPasswordCombinationErrorDescription]
-	
-! !
+	self should: [ self listPurchasesFor: invalidClientAndPassword ] 
+		raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface invalidClientPasswordCombinationErrorDescription]! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:02:28'!
-test21NewCartRequestedByRestInterfaceIsEmpty
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:50:57'!
+test17NewCartRequestedByRestInterfaceIsEmpty
 
 	| newCartId |
 
@@ -163,8 +161,8 @@ test21NewCartRequestedByRestInterfaceIsEmpty
 
 	self assert: (self listCart: newCartId) isEmpty! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:06:34'!
-test22CartContainsBookAfterAddingItThroughRestInterface
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:51:25'!
+test18CartContainsBookAfterAddingItThroughRestInterface
 	
 	| newCartId cartContents |
 	
@@ -178,20 +176,24 @@ test22CartContainsBookAfterAddingItThroughRestInterface
 	self assert: (cartContents occurrencesOf: aBook) equals: 5.
 	self assert: (cartContents occurrencesOf: anotherBook) equals: 6.! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:38:52'!
-test23CantOperateWithUnknownCartId
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:51:51'!
+test19CantOperateWithUnknownCartId
 	
-	self should: [ self addToCart: 1000 andBookIsbn: aBook andQuantity: 1. ] 
+	| unknownCartId |
+	
+	unknownCartId := 1000.
+	
+	self should: [ self addToCart: unknownCartId andBookIsbn: aBook andQuantity: 1. ] 
 		  raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface unknownCartIdErrorDescription ].
 		
-	self should: [ self listCart: 1000 ] 
+	self should: [ self listCart: unknownCartId ] 
 		  raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface unknownCartIdErrorDescription ].
 		
-	self should: [ self checkoutCart: 1000 ] 
+	self should: [ self checkoutCart: unknownCartId ] 
 		  raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface unknownCartIdErrorDescription ]! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 18:40:22'!
-test24AddingQuantityMustBeAPositiveInteger
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:00'!
+test20AddingQuantityMustBeAPositiveInteger
 	
 	| newCartId |
 	
@@ -203,18 +205,18 @@ test24AddingQuantityMustBeAPositiveInteger
 		  should: [ self addToCart: newCartId andBookIsbn: aBook andQuantity: -1. ] 
 		  raiseErrorThat: [ :anError | self assert: anError messageText equals: Cart notPositiveAddErrorDescription ]! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 18:39:49'!
-test25CantAddBookThatIsNotInThePriceList
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:08'!
+test21CantAddBookThatIsNotInThePriceList
 	
 	| newCartId |
 	
 	newCartId := self createCart.
 	
-	self should: [ self addToCart: newCartId andBookIsbn: 101010100110101 andQuantity: 1. ] 
+	self should: [ self addToCart: newCartId andBookIsbn: notInPriceListBook andQuantity: 1 ] 
 		  raiseErrorThat: [ :anError | self assert: anError messageText equals: Cart notInPriceListErrorDescription ]! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:38:58'!
-test26CantCheckoutThroughRestInterfaceIfCartIsEmpty
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:24'!
+test22CantCheckoutThroughRestInterfaceIfCartIsEmpty
 
 	| newCartId |
 	
@@ -223,21 +225,22 @@ test26CantCheckoutThroughRestInterfaceIfCartIsEmpty
 	self should: [ self checkoutCart: newCartId ]
 		  raiseErrorThat: [ :error | self assert: error messageText equals: Cashier emptyCartCheckoutErrorDescription ]! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:24:06'!
-test27CantCheckoutWithExpiredCreditCard
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:33'!
+test23CantCheckoutWithExpiredCreditCard
 
-	| newCartId aDate |
+	| newCartId aFutureDate |
 	
-	aDate := (Date year: 3000 day: 1).
-	newCartId := self createCartOnDate: aDate andTime: eleven.
+	aFutureDate := Date year: 3000 day: 1.
+	newCartId := self createCartOnDate: aFutureDate andTime: eleven.
 	
-	self addToCart: newCartId andBookIsbn: aBook andQuantity: 1 onDate: aDate andTime: eleven.
+	self addToCart: newCartId andBookIsbn: aBook andQuantity: 1 onDate: aFutureDate andTime: eleven.
 	
-	self should: [ self checkoutCart: newCartId onDate: aDate andTime: eleven ]
+	self should: [ self checkoutCart: newCartId onDate: aFutureDate andTime: eleven ]
+		"checkoutCart:onDate:andTime uses a card with exp date feb2019"
 		  raiseErrorThat: [ :error | self assert: error messageText equals: Cashier expiredCreditCardErrorDescription ]! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:27:03'!
-test28CartExpiresAfter30Min
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:40'!
+test24CartExpiresAfter30Min
 
 	| newCartId |
 	
@@ -256,21 +259,21 @@ test28CartExpiresAfter30Min
 		
 		! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:26:02'!
-test29CartLastActionIsUpdated
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:47'!
+test25CanUseCartIfLastActivityIsWithinLast30Minutes
 
 	| newCartId |
-	
+
 	newCartId := self createCart.
-	
+
 	self addToCart: newCartId andBookIsbn: aBook andQuantity: 1 onDate: firstFeb2018 andTime: elevenTwenty.
 
 	restInterface listCart: newCartId onDate: firstFeb2018 andTime: elevenForty.
 
-	self checkoutCart: newCartId onDate: firstFeb2018 andTime: 	(Time hour: 12 minute: 0 second: 0).! !
+	self checkoutCart: newCartId onDate: firstFeb2018 andTime:  twelve.! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 19:40:09'!
-test30CantUseCartAfterCheckout
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:52:56'!
+test26CantUseCartAfterCheckout
 
 	| newCartId |
 	
@@ -283,8 +286,8 @@ test30CantUseCartAfterCheckout
 	self should: [ self addToCart: newCartId andBookIsbn: aBook andQuantity: 1. ] 
 		  raiseErrorThat: [ :anError | self assert: anError messageText equals: RestInterface unknownCartIdErrorDescription ].! !
 
-!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'NC 6/26/2017 21:06:47'!
-test31CheckoutingCartCreatesRecordInSalesBook
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 16:53:04'!
+test27CheckoutingCartCreatesRecordInSalesBook
 
 	| cartId1 cartId2 ticket |
 	
@@ -304,6 +307,21 @@ test31CheckoutingCartCreatesRecordInSalesBook
 	self assert: ticket total equals: 115.
 	! !
 
+!TusLibrosTest methodsFor: '03 - Rest Interface' stamp: 'PV 6/27/2017 17:17:59'!
+test28MerchantProcessorErrorIsntHandledByRestInterface
+
+	| newCartId |	
+
+	newCartId := restInterfaceWithErrorMP createCartForClientID: 1 andPassword: 'password' onDate: firstFeb2018 andTime: eleven.
+
+	restInterfaceWithErrorMP addToCartWithID: newCartId andBookIsbn: aBook andQuantity: 1 onDate: firstFeb2018 andTime: eleven.
+
+	self
+		should: [ self checkoutCart: newCartId withRestInterface: restInterfaceWithErrorMP ]
+		raiseErrorThat: [ :error | 
+			self assert: error messageText equals: 'This is a description error'.
+			self assertSalesBookHasntChanged: aSalesBook ]! !
+
 
 !TusLibrosTest methodsFor: 'asserting' stamp: 'NC 6/25/2017 15:48:44'!
 assertBlock: aBlock FailsWithoutAddingItemToCartAndExceptionHasDescription: anErrorDescription
@@ -318,12 +336,12 @@ assertMPWasntCalled: aMerchantProcessor
 
 	self assert: aMerchantProcessor callsCount equals: 0! !
 
-!TusLibrosTest methodsFor: 'asserting' stamp: 'NC 6/25/2017 16:06:17'!
+!TusLibrosTest methodsFor: 'asserting' stamp: 'PV 6/27/2017 17:07:59'!
 assertSalesBookHasntChanged: aSalesBook
 
 	self assert: aSalesBook salesCount equals: 0! !
 
-!TusLibrosTest methodsFor: 'asserting' stamp: 'NC 6/18/2017 11:56:48'!
+!TusLibrosTest methodsFor: 'asserting' stamp: 'PV 6/27/2017 15:09:45'!
 should: aBlock raiseErrorThat: anAssertionBlock
 	
 	self should:aBlock
@@ -331,13 +349,14 @@ should: aBlock raiseErrorThat: anAssertionBlock
 		withExceptionDo: anAssertionBlock! !
 
 
-!TusLibrosTest methodsFor: 'setUp' stamp: 'NC 6/26/2017 20:36:16'!
+!TusLibrosTest methodsFor: 'setUp' stamp: 'PV 6/27/2017 16:33:44'!
 setUp
 
 	| oneItemPriceList aClientPassDict twoItemPriceList |
 
 	aBook := 1234567890123.
 	anotherBook := 1234567890124.
+	notInPriceListBook := 101010100110101.
 	
 	oneItemPriceList := Dictionary newFrom: { aBook->10.5 }.
 	twoItemPriceList := Dictionary newFrom: { aBook->11. anotherBook->20 }.
@@ -348,6 +367,7 @@ setUp
 	aSalesBook := SalesBook new.
 
 	aMP := MerchantProcessorSimulator newWithClosure: [ :card :amount | true ].
+	anErrorMP := MerchantProcessorSimulator newWithClosure: [ :card :amount | self error: 'This is a description error' ].
 
 	aCashier := Cashier newWithSalesBook: aSalesBook andMP: aMP.
 
@@ -359,14 +379,17 @@ setUp
 	eleven := Time hour: 11 minute: 0 second: 0.
 	elevenTwenty := Time hour: 11 minute: 20 second: 0.
 	elevenForty := Time hour: 11 minute: 40 second: 0.
+	twelve := Time hour: 12 minute: 0 second: 0.
 	
 	aClient := 'John'.
 	
 	aCreditCard := CreditCard newWithExpirationDate: feb2019 andOwner: 'John Doe' andNumber: 0123456789012345.
 	
 	aClientPassDict := Dictionary newFrom: { 1 -> 'password'. 2 -> 'clave'. 3 -> 'otraClave' }.
+	invalidClientAndPassword := 100 -> 'password'.
 	
-	restInterface := RestInterface newWithSalesBook: aSalesBook andPriceList: twoItemPriceList andMP: aMP andClientsPasswords: aClientPassDict.! !
+	restInterface := RestInterface newWithSalesBook: aSalesBook andPriceList: twoItemPriceList andMP: aMP andClientsPasswords: aClientPassDict.
+	restInterfaceWithErrorMP := RestInterface newWithSalesBook: aSalesBook andPriceList: twoItemPriceList andMP: anErrorMP andClientsPasswords: aClientPassDict.! !
 
 
 !TusLibrosTest methodsFor: 'private' stamp: 'NC 6/26/2017 18:41:30'!
@@ -394,15 +417,30 @@ checkoutCart: aCartId
 	
 	^ self checkoutCart: aCartId onDate: firstFeb2018 andTime: eleven! !
 
-!TusLibrosTest methodsFor: 'private' stamp: 'NC 6/26/2017 19:21:51'!
+!TusLibrosTest methodsFor: 'private' stamp: 'PV 6/27/2017 16:39:52'!
 checkoutCart: aCartId onDate: aDate andTime: aTime
 	
-	^ restInterface checkoutCartWithId: aCartId ccn: 0123456789012345 cced: feb2019 cco: 'John Doe' onDate: aDate andTime: aTime! !
+	^ self checkoutCart: aCartId withRestInterface: restInterface onDate: aDate andTime: aTime! !
+
+!TusLibrosTest methodsFor: 'private' stamp: 'PV 6/27/2017 16:37:52'!
+checkoutCart: aCartId withRestInterface: aRestInterface
+	
+	^ self checkoutCart: aCartId withRestInterface: aRestInterface onDate: firstFeb2018 andTime: eleven! !
+
+!TusLibrosTest methodsFor: 'private' stamp: 'PV 6/27/2017 16:39:05'!
+checkoutCart: aCartId withRestInterface: aRestInterface onDate: aDate andTime: aTime
+
+	^ aRestInterface checkoutCartWithId: aCartId ccn: 0123456789012345 cced: feb2019 cco: 'John Doe' onDate: aDate andTime: aTime! !
 
 !TusLibrosTest methodsFor: 'private' stamp: 'NC 6/26/2017 18:32:59'!
 createCart
 	
 	^ self createCartOnDate: firstFeb2018 andTime: eleven.! !
+
+!TusLibrosTest methodsFor: 'private' stamp: 'PV 6/27/2017 13:16:30'!
+createCartFor: aClientAndPassword
+	
+	^ restInterface createCartForClientID: aClientAndPassword key andPassword: aClientAndPassword value onDate: firstFeb2018 andTime: eleven! !
 
 !TusLibrosTest methodsFor: 'private' stamp: 'NC 6/26/2017 18:32:44'!
 createCartOnDate: aDate andTime: aTime
@@ -413,6 +451,11 @@ createCartOnDate: aDate andTime: aTime
 listCart: aCartId
 	
 	^ restInterface listCart: aCartId onDate: firstFeb2018 andTime: eleven.! !
+
+!TusLibrosTest methodsFor: 'private' stamp: 'PV 6/27/2017 13:18:24'!
+listPurchasesFor: aClientAndPassword
+	
+	^ restInterface listPurchasesClientId: aClientAndPassword key andPassword: aClientAndPassword value! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
@@ -688,7 +731,7 @@ addToCartWithID: aCartId andBookIsbn: aBookIsbn andQuantity: aNumber onDate: aDa
 
 	! !
 
-!RestInterface methodsFor: 'interface operations' stamp: 'NC 6/26/2017 21:15:08'!
+!RestInterface methodsFor: 'interface operations' stamp: 'PV 6/27/2017 13:57:01'!
 checkoutCartWithId: aCartId ccn: aCardNumber cced: aMonth cco: aName onDate: aDate andTime: aTime
 
 	| newCashier cart card ticket ticketId |
@@ -810,7 +853,7 @@ newWithSalesBook: aSalesBook andPriceList: aDictionary andMP: aMerchantProcessor
 
 !classDefinition: #SalesBook category: #'TusLibros-Solution'!
 Object subclass: #SalesBook
-	instanceVariableNames: 'sales salesCount'
+	instanceVariableNames: 'sales'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -820,26 +863,23 @@ clientTickets: aClient
 	
 	^ sales at: aClient ifAbsent: [ ^ Set new ]! !
 
-!SalesBook methodsFor: 'accessing' stamp: 'NC 6/26/2017 20:43:55'!
+!SalesBook methodsFor: 'accessing' stamp: 'PV 6/27/2017 17:07:00'!
 salesCount
 	
-	^ salesCount! !
+	^ (sales values inject: Set new into: [ :sum :set | sum union: set ]) size! !
 
 
-!SalesBook methodsFor: 'adding' stamp: 'NC 6/26/2017 20:44:13'!
+!SalesBook methodsFor: 'adding' stamp: 'PV 6/27/2017 16:54:21'!
 successfulSale: aTicket byClient: aClient
 
 	sales at: aClient ifAbsentPut: Set new.
-	(sales at: aClient) add: aTicket.
-	
-	salesCount := salesCount + 1! !
+	(sales at: aClient) add: aTicket! !
 
 
-!SalesBook methodsFor: 'initialization' stamp: 'NC 6/26/2017 20:45:17'!
+!SalesBook methodsFor: 'initialization' stamp: 'PV 6/27/2017 16:54:01'!
 initialize
 
-	sales := Dictionary new.
-	salesCount := 0.! !
+	sales := Dictionary new! !
 
 
 !classDefinition: #Ticket category: #'TusLibros-Solution'!
