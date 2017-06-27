@@ -731,10 +731,10 @@ addToCartWithID: aCartId andBookIsbn: aBookIsbn andQuantity: aNumber onDate: aDa
 
 	! !
 
-!RestInterface methodsFor: 'interface operations' stamp: 'PV 6/27/2017 13:57:01'!
+!RestInterface methodsFor: 'interface operations' stamp: 'PV 6/27/2017 17:30:04'!
 checkoutCartWithId: aCartId ccn: aCardNumber cced: aMonth cco: aName onDate: aDate andTime: aTime
 
-	| newCashier cart card ticket ticketId |
+	| newCashier cart card |
 	
 	self checkCartExists: aCartId.
 	self checkCartExpiration: aCartId withDateTime: (DateAndTime date: aDate time: aTime).
@@ -743,15 +743,11 @@ checkoutCartWithId: aCartId ccn: aCardNumber cced: aMonth cco: aName onDate: aDa
 	cart := cartsIds at: aCartId.
 	card := CreditCard newWithExpirationDate: aMonth andOwner: aName andNumber: aCardNumber.
 	
-	ticket := newCashier checkoutCart: cart byClient: (clientByCart at: aCartId) payingWith: card onDate: aDate.
-	ticketId := transactions size + 1.
-	transactions at: ticketId put: ticket.
+	newCashier checkoutCart: cart byClient: (clientByCart at: aCartId) payingWith: card onDate: aDate.
 	
 	cartsIds removeKey: aCartId.
 	cartActionDateTime removeKey: aCartId.
-	clientByCart removeKey: aCartId.
-	
-	^ ticketId! !
+	clientByCart removeKey: aCartId.! !
 
 !RestInterface methodsFor: 'interface operations' stamp: 'NC 6/26/2017 20:38:53'!
 createCartForClientID: aClientId andPassword: aPassword onDate: aDate andTime: aTime
